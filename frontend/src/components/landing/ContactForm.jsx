@@ -33,7 +33,7 @@ const ContactForm = () => {
     >
       {/* Left Section: Contact Info */}
       <div style={{ width: "40%", paddingRight: "20px" }}>
-        <h2 style={{ fontSize: "24px", fontWeight: "600", marginBottom: "10px" }}>Contact Us</h2>
+        <h2 style={{fontSize: "24px", fontWeight: "600", marginBottom: "10px" }}>Contact Us</h2>
         <p style={{ color: "#555" }}>Our mailing address is:</p>
         <p style={{ color: "#444", marginBottom: "8px" }}>152A Charlotte Street, Peterborough ON</p>
         <p style={{ color: "#444", fontWeight: "bold" }}>Phone: 705-742-3221</p>
