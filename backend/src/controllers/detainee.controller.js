@@ -1,6 +1,7 @@
 import { Detainee } from "../models/detainee.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
+import { Case } from "../models/case.model.js";
 
 const getCookieOptions = () => ({
   httpOnly: true,
@@ -108,11 +109,12 @@ export const detaineeLogin = async (req, res) => {
 
         res.status(200).json({ 
             message: 'Login successful!', 
-            user: { // Changed from 'data' to 'user'
+            user: {
                 id: detainee._id,
                 name: detainee.name,
                 username: detainee.username
             },
+            token: token,  // Added token to response
             success: true
         });
     } catch (error) {
@@ -130,4 +132,52 @@ export const detaineeLogout = (req, res) => {
         message: "Logout successful",
         success: true
     });
+};
+
+
+export const getOngoingCases = async (req, res) => {
+    try {
+        // Get username from URL parameter
+        const { username } = req.params;
+        
+        const cases = await Case.find({ 
+            detaineeUsername: username,
+            status: { $nin: ["closed", "dismissed"] }
+        }).sort({ filingDate: -1 });
+
+        res.status(200).json({
+            success: true,
+            data: cases
+        });
+    } catch (error) {
+        console.error("Error fetching ongoing cases:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Internal server error"
+        });
+    }
+};
+
+export const getBailAppeals = async (req, res) => {
+    try {
+        const { username } = req.params;
+        const cases = await Case.find({ 
+            detaineeUsername: username,
+            bailStatus: { $in: ["Pending to judge", "Pending to lawyer"] }
+        });
+
+        const pendingToJudge = cases.filter(c => c.bailStatus === "Pending to judge");
+        const pendingToLawyer = cases.filter(c => c.bailStatus === "Pending to lawyer");
+
+        res.status(200).json({
+            success: true,
+            data: { pendingToJudge, pendingToLawyer }
+        });
+    } catch (error) {
+        console.error("Error fetching bail appeals:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Internal server error"
+        });
+    }
 };

@@ -168,11 +168,14 @@ export const getOngoingCases = async (req, res) => {
 
 export const getBailAppeals = async (req, res) => {
   try {
-    const cases = await Case.find({ 
-      lawyerId: req.params.lawyerId,
-      bailStatus: ""
-    });
-    
+    const cases = await Case.find(
+      { 
+        lawyerId: req.params.lawyerId,
+        bailStatus: "" // Assuming bailStatus is empty for new bail appeals
+      },
+      "caseId caseTitle detaineeName detaineeUsername groundsOfBail bailFilingDate judgeComments caseSummary status" // Select the same fields as the judge's getBailAppeals
+    ).sort({ bailFilingDate: -1 }); // Sort by bailFilingDate in descending order
+
     res.status(200).json({ appeals: cases });
   } catch (error) {
     console.error("Error fetching bail appeals:", error);
