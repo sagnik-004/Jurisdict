@@ -63,9 +63,13 @@ const DetaineeSigninSignup = () => {
           { withCredentials: true }
         );
 
+        // Store user and token in localStorage
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        
         setMessage("Sign-up successful! Redirecting...");
         setTimeout(() => {
-          navigate(`/d/${response.data.username}`);
+          navigate(`/d/${response.data.user.username}`);
         }, 1500);
       } else {
         const response = await axiosInstance.post(
@@ -77,9 +81,13 @@ const DetaineeSigninSignup = () => {
           { withCredentials: true }
         );
 
+        // Store user and token in localStorage
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        
         setMessage("Login successful! Redirecting...");
         setTimeout(() => {
-          navigate(`/d/${response.data.username}`);
+          navigate(`/d/${response.data.user.username}`);
         }, 1500);
       }
     } catch (err) {

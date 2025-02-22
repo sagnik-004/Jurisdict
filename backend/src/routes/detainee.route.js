@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { detaineeSignup, detaineeLogin, detaineeLogout } from "../controllers/detainee.controller.js";
+import { detaineeSignup, detaineeLogin, detaineeLogout, getOngoingCases, getBailAppeals } from "../controllers/detainee.controller.js";
 
 const router = Router();
 
@@ -7,5 +7,8 @@ const router = Router();
 router.post("/signup", detaineeSignup);
 router.post("/login", detaineeLogin);
 router.post("/logout", detaineeLogout);
+
+router.get("/ongoing/:username", getOngoingCases);
+router.get("/bail-appeals/:username", getBailAppeals);
 
 export default router;
