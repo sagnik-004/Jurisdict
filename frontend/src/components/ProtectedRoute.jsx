@@ -9,15 +9,9 @@ const ProtectedRoute = ({ children, userType }) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5001/auth/refresh",
-          {
-            withCredentials: true,
-            headers: {
-              'Accept': 'application/json',
-            }
-          }
-        );
+        const response = await axios.get("http://localhost:5001/auth/refresh", {
+          withCredentials: true,
+        });
 
         if (!response.data?.user) {
           throw new Error("Invalid refresh response");
@@ -26,8 +20,6 @@ const ProtectedRoute = ({ children, userType }) => {
         setUser(response.data.user);
       } catch (error) {
         console.error("Authentication failed:", error);
-        // Clear cookie with same attributes
-        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; sameSite=none";
         setUser(null);
       } finally {
         setLoading(false);
@@ -35,11 +27,6 @@ const ProtectedRoute = ({ children, userType }) => {
     };
 
     verifyUser();
-
-    return () => {
-      const source = axios.CancelToken.source();
-      source.cancel('Component unmounted');
-    };
   }, []);
 
   if (loading) {
@@ -50,8 +37,14 @@ const ProtectedRoute = ({ children, userType }) => {
     );
   }
 
+  // If no user, redirect to landing page
   if (!user) {
     return <Navigate to="/landing" replace />;
+  }
+
+  // If userType is specified, check if user has correct type
+  if (userType && user.type !== userType) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

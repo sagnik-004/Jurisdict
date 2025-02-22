@@ -54,6 +54,7 @@ export const lawyerSignup = async (req, res) => {
         username: lawyer.username,
         lawyerId: lawyer.lawyerId
       },
+      token: token,
       success: true
     });
   } catch (error) {
@@ -76,15 +77,21 @@ export const lawyerLogin = async (req, res) => {
       });
     }
 
-    const query = {
-      $or: [
-        { email: usernameOrLawyerId },
-        { username: usernameOrLawyerId },
-        { lawyerId: usernameOrLawyerId }
-      ]
-    };
+    // Create query conditions array
+    const orConditions = [
+      { email: usernameOrLawyerId },
+      { username: usernameOrLawyerId }
+    ];
 
-    const lawyer = await Lawyer.findOne(query).select("+password");
+    // Add numeric lawyerId condition if input is numeric
+    const numericId = Number(usernameOrLawyerId);
+    if (!isNaN(numericId)) {
+      orConditions.push({ lawyerId: numericId });
+    }
+
+    const lawyer = await Lawyer.findOne({
+      $or: orConditions
+    }).select("+password");
 
     if (!lawyer) {
       return res.status(404).json({ 
@@ -104,19 +111,22 @@ export const lawyerLogin = async (req, res) => {
     const token = generateToken(lawyer._id, lawyer.email, lawyer.username);
     res.cookie("token", token, getCookieOptions());
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful!",
       user: {
         id: lawyer._id,
         name: lawyer.name,
         username: lawyer.username,
-        lawyerId: lawyer.lawyerId
+        lawyerId: lawyer.lawyerId,
+        email: lawyer.email
       },
+      token: token,
       success: true
     });
+
   } catch (error) {
     console.error("Login Error:", error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       message: "Internal Server Error",
       success: false
     });

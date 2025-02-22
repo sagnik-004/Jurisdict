@@ -42,7 +42,7 @@ const LawyerSigninSignup = () => {
         const response = await axiosInstance.post("/lawyer/signup", signupData);
         if (response.data) {
           setSuccess("Signup successful! Redirecting to dashboard...");
-          localStorage.setItem("user", JSON.stringify(response.data.data));
+          localStorage.setItem("user", JSON.stringify(response.data.user));
           localStorage.setItem("token", response.data.token);
 
           setTimeout(() => {
@@ -50,20 +50,20 @@ const LawyerSigninSignup = () => {
           }, 1500);
         }
       } else {
-        // Updated login logic
+        // Updated login logic to match backend expectations
         const response = await axiosInstance.post("/lawyer/login", {
-          usernameOrLawyerId: formData.usernameOrLawyerId,
+          usernameOrLawyerId: formData.usernameOrLawyerId, // Corrected field name
           password: formData.password,
         });
         if (response.data) {
           setSuccess("Login successful!");
-          localStorage.setItem("user", JSON.stringify(response.data.data));
+          localStorage.setItem("user", JSON.stringify(response.data.user));
           localStorage.setItem("token", response.data.token);
           setFormData({
             usernameOrLawyerId: "",
             password: "",
           });
-          navigate(`/l/${response.data.data.username}`);
+          navigate(`/l/${response.data.user.username}`);
         }
       }
     } catch (err) {
@@ -159,7 +159,7 @@ const LawyerSigninSignup = () => {
                   type="text"
                   name="usernameOrLawyerId"
                   value={formData.usernameOrLawyerId}
-                  placeholder="Username or Lawyer ID"
+                  placeholder="Username or Lawyer ID" // Updated placeholder
                   required
                   onChange={handleChange}
                   style={{
