@@ -21,7 +21,7 @@ case_collection = db.cases
 # Configure Gemini AI
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-class CaseProcessor:
+class JudgeCaseProcessor:
     def __init__(self):
         self.vectorizer = CountVectorizer(stop_words="english")
         self.past_cases = self._fetch_and_vectorize_past_cases()
@@ -107,7 +107,7 @@ class CaseProcessor:
             return "Unable to generate AI report at this time."
 
 if __name__ == "__main__":
-    processor = CaseProcessor()
+    processor = JudgeCaseProcessor()
     test_result = processor.process_new_case(
         case_summary="Financial fraud case under BNS sections 420 and 335",
         grounds_of_bail=["No prior record", "Permanent residence"],
