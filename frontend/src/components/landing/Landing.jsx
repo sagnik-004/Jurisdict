@@ -82,6 +82,7 @@ const Landing = () => {
 
   return (
     <div style={{ backgroundColor: colors.background, color: colors.text }}>
+      {/* Navbar */}
       <nav
         style={{
           position: "fixed",
@@ -254,6 +255,7 @@ const Landing = () => {
         </div>
       </nav>
 
+      {/* Hero Section */}
       <section
         id="home"
         style={{
@@ -349,6 +351,7 @@ const Landing = () => {
         </motion.div>
       </section>
 
+      {/* Stats Section */}
       <section
         id="stats"
         style={{
@@ -419,6 +422,7 @@ const Landing = () => {
         </motion.div>
       </section>
 
+      {/* Features Section */}
       <section id="features" style={{ padding: "80px 32px" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -483,6 +487,7 @@ const Landing = () => {
         </motion.div>
       </section>
 
+      {/* Footer */}
       <footer
         style={{
           backgroundColor: darkMode ? "#1E293B" : "#F8FAFC",
