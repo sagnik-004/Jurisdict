@@ -10,6 +10,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ContactForm from "./ContactForm"; 
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -484,6 +485,29 @@ const Landing = () => {
               </motion.div>
             ))}
           </div>
+        </motion.div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" style={{ padding: "80px 32px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          style={{ maxWidth: 1280, margin: "0 auto" }}
+        >
+          <h2
+            style={{
+              fontSize: 40,
+              fontWeight: 700,
+              textAlign: "center",
+              marginBottom: 48,
+            }}
+          >
+            Contact Us
+          </h2>
+          <ContactForm /> {/* Insert the ContactForm component here */}
         </motion.div>
       </section>
 
