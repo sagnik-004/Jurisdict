@@ -182,7 +182,15 @@ const Landing = () => {
             justifyContent: "space-between",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 48 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {/* Logo/Icon */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Scale size={28} color={colors.primary} />
+            </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
