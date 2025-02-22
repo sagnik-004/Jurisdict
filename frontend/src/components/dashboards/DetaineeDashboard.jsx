@@ -78,7 +78,7 @@ const DetaineeDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    window.location.href = "/login"; // Redirect to login page
+    window.location.href = "/landing";
   };
 
   const handleCaseSummaryChange = (event) => {
