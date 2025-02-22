@@ -8,13 +8,15 @@ import {
   Gavel,
   Scale,
   Lock,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ContactForm from "./ContactForm";
 
 class TypeWriter extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       text: "",
       wordIndex: 0,
@@ -48,15 +50,14 @@ class TypeWriter extends React.Component {
       });
     }
 
-    let typeSpeed = 100; // Increased typing speed
+    let typeSpeed = 100;
 
     if (isDeleting) {
-      typeSpeed /= 2; // Faster erasure
+      typeSpeed /= 2;
     }
 
     if (!isDeleting && text === currentWord) {
-      typeSpeed = 1000; // Pause before deleting
-
+      typeSpeed = 1000;
       this.setState({
         isWaiting: true,
         isDeleting: true,
@@ -66,7 +67,7 @@ class TypeWriter extends React.Component {
         isDeleting: false,
         wordIndex: wordIndex + 1,
       });
-      typeSpeed = 200; // Faster transition to next word
+      typeSpeed = 200;
     }
 
     this.typeTimeout = setTimeout(() => this.type(), typeSpeed);
@@ -74,7 +75,6 @@ class TypeWriter extends React.Component {
 
   render() {
     const { text, isWaiting } = this.state;
-
     return (
       <span className={`dynamic-text ${isWaiting ? "fade" : ""}`}>{text}</span>
     );
@@ -88,6 +88,7 @@ const Landing = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [isScrolled, setIsScrolled] = useState(false);
   const [buttonHover, setButtonHover] = useState({});
+  const [featureIndex, setFeatureIndex] = useState(0);
   const menuRef = useRef(null);
 
   const roles = [
@@ -150,9 +151,45 @@ const Landing = () => {
     setShowRegisterMenu(false);
   };
 
+  const features = [
+    {
+      title: "Predictive Analytics",
+      description: "AI-powered case outcome predictions with 95% accuracy",
+    },
+    {
+      title: "Document Automation",
+      description: "Generate legal documents in seconds with smart templates",
+    },
+    {
+      title: "Case Tracking",
+      description: "Real-time updates and deadline management system",
+    },
+    {
+      title: "Legal Research",
+      description: "Access to comprehensive legal databases and precedents",
+    },
+    {
+      title: "Client Management",
+      description: "Efficiently manage client information and communications",
+    },
+    {
+      title: "Bail Reckoner",
+      description: "Calculate bail amounts with precision using AI algorithms",
+    },
+  ];
+
+  const handleNextFeature = () => {
+    setFeatureIndex((prevIndex) => (prevIndex + 1) % features.length);
+  };
+
+  const handlePrevFeature = () => {
+    setFeatureIndex(
+      (prevIndex) => (prevIndex - 1 + features.length) % features.length
+    );
+  };
+
   return (
     <div style={{ backgroundColor: colors.background, color: colors.text }}>
-      {/* Navbar */}
       <nav
         style={{
           position: "fixed",
@@ -183,7 +220,6 @@ const Landing = () => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            {/* Logo/Icon */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -333,7 +369,6 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section
         id="home"
         style={{
@@ -365,10 +400,10 @@ const Landing = () => {
             }}
           >
             <span style={{ color: colors.primary, fontSize: 14 }}>
-              AI-powered case management
+              Get bailed out
             </span>
             <span style={{ color: colors.secondary, fontSize: 14 }}>
-              ✨ New Feature
+              ✨ real quick
             </span>
           </motion.div>
           <motion.h1
@@ -403,8 +438,7 @@ const Landing = () => {
             }}
           >
             <div style={{ display: "inline-block" }}>
-              Transform legal workflows with predictive analytics and
-              intelligent case management
+              Bail Decisions and Intelligent Case Management- Faster Than Ever
             </div>
           </motion.p>
           <motion.div
@@ -435,7 +469,6 @@ const Landing = () => {
         </motion.div>
       </section>
 
-      {/* Stats Section */}
       <section
         id="stats"
         style={{
@@ -506,8 +539,115 @@ const Landing = () => {
         </motion.div>
       </section>
 
-      {/* Features Section */}
       <section id="features" style={{ padding: "80px 32px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          style={{ maxWidth: 1280, margin: "0 auto", position: "relative" }}
+        >
+          <h2
+            style={{
+              fontSize: 40,
+              fontWeight: 700,
+              textAlign: "center",
+              marginBottom: 48,
+            }}
+          >
+            Core Features
+          </h2>
+          <div style={{ position: "relative" }}>
+            <motion.button
+              onClick={handlePrevFeature}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              style={{
+                position: "absolute",
+                left: -24,
+                top: "50%",
+                transform: "translateY(-50%)",
+                padding: 8,
+                borderRadius: "50%",
+                background: colors.primary,
+                border: "none",
+                color: "white",
+                cursor: "pointer",
+                zIndex: 1000,
+              }}
+            >
+              <ArrowLeft size={16} />
+            </motion.button>
+            <motion.button
+              onClick={handleNextFeature}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              style={{
+                position: "absolute",
+                right: -24,
+                top: "50%",
+                transform: "translateY(-50%)",
+                padding: 8,
+                borderRadius: "50%",
+                background: colors.primary,
+                border: "none",
+                color: "white",
+                cursor: "pointer",
+                zIndex: 1000,
+              }}
+            >
+              <ArrowRight size={16} />
+            </motion.button>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 32,
+              }}
+            >
+              {features
+                .slice(featureIndex, featureIndex + 3)
+                .map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.8, delay: index * 0.2 }}
+                    viewport={{ once: true }}
+                    style={{
+                      padding: 32,
+                      borderRadius: 16,
+                      backgroundColor: darkMode ? "#1E293B" : "#FFFFFF",
+                      border: `1px solid ${colors.border}`,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 600,
+                        marginBottom: 16,
+                      }}
+                    >
+                      {feature.title}
+                    </h3>
+                    <p style={{ color: colors.muted }}>{feature.description}</p>
+                  </motion.div>
+                ))}
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      <section
+        id="about"
+        style={{
+          padding: "80px 32px",
+          backgroundColor: darkMode ? "#1E293B" : "#F8FAFC",
+        }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -523,55 +663,148 @@ const Landing = () => {
               marginBottom: 48,
             }}
           >
-            Core Features
+            About JurisDict
           </h2>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: 32,
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 48,
+              alignItems: "center",
             }}
           >
-            {[
-              {
-                title: "Predictive Analytics",
-                description:
-                  "AI-powered case outcome predictions with 95% accuracy",
-              },
-              {
-                title: "Document Automation",
-                description:
-                  "Generate legal documents in seconds with smart templates",
-              },
-              {
-                title: "Case Tracking",
-                description: "Real-time updates and deadline management system",
-              },
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-                viewport={{ once: true }}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              style={{
+                padding: 32,
+                borderRadius: 16,
+                backgroundColor: colors.background,
+                border: `1px solid ${colors.border}`,
+                boxShadow: darkMode
+                  ? "0 8px 24px rgba(255, 255, 255, 0.1)"
+                  : "0 8px 24px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <h3
                 style={{
-                  padding: 32,
-                  borderRadius: 16,
-                  backgroundColor: darkMode ? "#1E293B" : "#FFFFFF",
-                  border: `1px solid ${colors.border}`,
+                  fontSize: 24,
+                  fontWeight: 600,
+                  marginBottom: 16,
+                  color: colors.primary,
                 }}
               >
-                <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>
-                  {feature.title}
-                </h3>
-                <p style={{ color: colors.muted }}>{feature.description}</p>
-              </motion.div>
-            ))}
+                Simplifying the Bail Process
+              </h3>
+              <p style={{ color: colors.muted, lineHeight: 1.6 }}>
+                JurisDict is an AI-powered platform designed to simplify the
+                bail process for detainees, lawyers, and judges. By leveraging
+                advanced AI algorithms, we provide accurate bail predictions,
+                streamline legal workflows, and ensure fair and timely justice
+                for all.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 24,
+              }}
+            >
+              {[
+                {
+                  title: "For Detainees",
+                  description:
+                    "Quick and accurate bail predictions to reduce time in custody.",
+                  icon: <Lock size={24} color={colors.primary} />,
+                },
+                {
+                  title: "For Lawyers",
+                  description:
+                    "Efficient case management and document automation tools.",
+                  icon: <Gavel size={24} color={colors.primary} />,
+                },
+                {
+                  title: "For Judges",
+                  description:
+                    "Data-driven insights to make informed bail decisions.",
+                  icon: <Scale size={24} color={colors.primary} />,
+                },
+                {
+                  title: "AI-Powered",
+                  description:
+                    "Advanced algorithms ensure fairness and accuracy in bail predictions.",
+                  icon: <Sun size={24} color={colors.primary} />,
+                },
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    padding: 24,
+                    borderRadius: 16,
+                    backgroundColor: colors.background,
+                    border: `1px solid ${colors.border}`,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      marginBottom: 16,
+                    }}
+                  >
+                    {item.icon}
+                    <h4
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 600,
+                        color: colors.text,
+                      }}
+                    >
+                      {item.title}
+                    </h4>
+                  </div>
+                  <p style={{ color: colors.muted }}>{item.description}</p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </motion.div>
       </section>
 
-      {/* Footer */}
+      <section id="contact" style={{ padding: "80px 32px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          style={{ maxWidth: 1280, margin: "0 auto" }}
+        >
+          <h2
+            style={{
+              fontSize: 40,
+              fontWeight: 700,
+              textAlign: "center",
+              marginBottom: 48,
+            }}
+          >
+            Contact Us
+          </h2>
+          <ContactForm darkMode={darkMode} colors={colors} />
+        </motion.div>
+      </section>
+
       <footer
         style={{
           backgroundColor: darkMode ? "#1E293B" : "#F8FAFC",
@@ -597,7 +830,7 @@ const Landing = () => {
               JurisDict
             </h3>
             <p style={{ color: colors.muted, lineHeight: 1.6 }}>
-              Transforming legal practice through AI-powered solutions
+              Bail Decisions and Intelligent Case Management—Faster Than Ever
             </p>
           </div>
           <div>
