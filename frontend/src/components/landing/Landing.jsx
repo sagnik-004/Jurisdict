@@ -910,7 +910,8 @@ const Landing = () => {
             color: colors.muted,
           }}
         >
-          © {new Date().getFullYear()} JurisDict. All rights reserved.
+          © {new Date().getFullYear()} JurisDict. All rights reserved. Made with
+          ❤️ by CodeClique
         </motion.div>
       </footer>
     </div>
