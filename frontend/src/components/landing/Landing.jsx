@@ -260,7 +260,7 @@ const Landing = () => {
         id="home"
         style={{
           height: "100vh",
-          padding: "200px 32px 80px",
+          padding: "16px 32px 80px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -283,7 +283,7 @@ const Landing = () => {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              marginBottom: 24,
+              marginBottom: -60,
             }}
           >
             <span style={{ color: colors.primary, fontSize: 14 }}>
