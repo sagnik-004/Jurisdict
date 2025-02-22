@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { axiosInstance } from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, Home, Briefcase } from "lucide-react";
+import { User, Mail, Lock, Home, Briefcase, Sun, Moon } from "lucide-react";
+import { motion } from "framer-motion";
 
 const JudgeSigninSignUp = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,6 +18,7 @@ const JudgeSigninSignUp = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   const navigate = useNavigate();
 
@@ -62,47 +64,109 @@ const JudgeSigninSignUp = () => {
     }
   };
 
+  const colors = {
+    background: darkMode ? "#0F172A" : "#F8FAFC",
+    text: darkMode ? "#F1F5F9" : "#0F172A",
+    muted: darkMode ? "#94A3B8" : "#64748B",
+    primary: darkMode ? "#818CF8" : "#6366F1",
+    secondary: darkMode ? "#EC4899" : "#EC4899",
+    glass: darkMode ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)",
+    border: darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
+  };
+
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
       style={{
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        background: "#ffffff",
+        background: darkMode
+          ? "linear-gradient(135deg, #0F172A, #1E293B)"
+          : "linear-gradient(135deg, #F8FAFC, #E2E8F0)",
         padding: "20px",
       }}
     >
-      <div
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
         style={{
-          background: "rgba(255, 255, 255, 0.9)",
-          padding: "30px",
-          borderRadius: "16px",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+          background: colors.glass,
+          padding: "40px",
+          borderRadius: "24px",
+          backdropFilter: "blur(20px)",
+          boxShadow: darkMode
+            ? "0 8px 32px rgba(0, 0, 0, 0.2)"
+            : "0 8px 32px rgba(0, 0, 0, 0.1)",
           width: "100%",
           maxWidth: "400px",
           textAlign: "center",
+          border: `1px solid ${colors.border}`,
         }}
       >
-        <h2
+        <div
           style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
             marginBottom: "20px",
-            color: "#333",
-            fontSize: "24px",
-            fontWeight: "600",
+            position: "relative",
           }}
         >
-          {isLogin ? "Login" : "Sign up"}
-        </h2>
-        <p style={{ color: "#666", marginBottom: "20px", fontSize: "14px" }}>
+          <motion.h2
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            style={{
+              color: colors.text,
+              fontSize: "24px",
+              fontWeight: "700",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            {isLogin ? "Login" : "Sign up"}
+          </motion.h2>
+          <motion.button
+            onClick={() => setDarkMode(!darkMode)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            style={{
+              padding: "8px",
+              borderRadius: "8px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: colors.text,
+              position: "absolute",
+              right: 0,
+            }}
+          >
+            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </motion.button>
+        </div>
+
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          style={{ color: colors.muted, marginBottom: "20px", fontSize: "14px" }}
+        >
           {isLogin ? "Login to continue" : "Create an account to continue"}
-        </p>
+        </motion.p>
 
         {error && (
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
             style={{
-              backgroundColor: "#ffebee",
-              color: "#c62828",
+              backgroundColor: darkMode ? "#FFEBEE20" : "#FFEBEE",
+              color: "#C62828",
               padding: "10px",
               borderRadius: "8px",
               marginBottom: "20px",
@@ -110,14 +174,17 @@ const JudgeSigninSignUp = () => {
             }}
           >
             {error}
-          </div>
+          </motion.div>
         )}
 
         {success && (
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
             style={{
-              backgroundColor: "#e8f5e9",
-              color: "#2e7d32",
+              backgroundColor: darkMode ? "#E8F5E920" : "#E8F5E9",
+              color: "#2E7D32",
               padding: "10px",
               borderRadius: "8px",
               marginBottom: "20px",
@@ -125,222 +192,252 @@ const JudgeSigninSignUp = () => {
             }}
           >
             {success}
-          </div>
+          </motion.div>
         )}
 
         <form onSubmit={handleSubmit}>
-          {isLogin ? (
-            <>
-              <div style={{ position: "relative", marginBottom: "15px" }}>
-                <Briefcase
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#999",
-                  }}
-                />
-                <input
-                  type="text"
-                  name="judgeIdOrUsername"
-                  value={formData.judgeIdOrUsername}
-                  placeholder="Judge ID or Username"
-                  required
-                  onChange={handleChange}
-                  style={{
-                    width: "calc(100% - 40px)",
-                    padding: "10px 10px 10px 35px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    outline: "none",
-                    fontSize: "14px",
-                  }}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <div style={{ position: "relative", marginBottom: "15px" }}>
-                <User
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#999",
-                  }}
-                />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  placeholder="Full Name"
-                  required
-                  onChange={handleChange}
-                  style={{
-                    width: "calc(100% - 40px)",
-                    padding: "10px 10px 10px 35px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    outline: "none",
-                    fontSize: "14px",
-                  }}
-                />
-              </div>
-              <div style={{ position: "relative", marginBottom: "15px" }}>
-                <Home
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#999",
-                  }}
-                />
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  placeholder="Address"
-                  required
-                  onChange={handleChange}
-                  style={{
-                    width: "calc(100% - 40px)",
-                    padding: "10px 10px 10px 35px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    outline: "none",
-                    fontSize: "14px",
-                  }}
-                />
-              </div>
-              <div style={{ position: "relative", marginBottom: "15px" }}>
-                <Mail
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#999",
-                  }}
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  placeholder="Email"
-                  required
-                  onChange={handleChange}
-                  style={{
-                    width: "calc(100% - 40px)",
-                    padding: "10px 10px 10px 35px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    outline: "none",
-                    fontSize: "14px",
-                  }}
-                />
-              </div>
-              <div style={{ position: "relative", marginBottom: "15px" }}>
-                <User
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#999",
-                  }}
-                />
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  placeholder="Username"
-                  required
-                  onChange={handleChange}
-                  style={{
-                    width: "calc(100% - 40px)",
-                    padding: "10px 10px 10px 35px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    outline: "none",
-                    fontSize: "14px",
-                  }}
-                />
-              </div>
-              <div style={{ position: "relative", marginBottom: "15px" }}>
-                <Briefcase
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#999",
-                  }}
-                />
-                <input
-                  type="number"
-                  name="judgeId"
-                  value={formData.judgeId}
-                  placeholder="Judge ID"
-                  required
-                  onChange={handleChange}
-                  style={{
-                    width: "calc(100% - 40px)",
-                    padding: "10px 10px 10px 35px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    outline: "none",
-                    fontSize: "14px",
-                  }}
-                />
-              </div>
-            </>
-          )}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            {isLogin ? (
+              <>
+                <div style={{ position: "relative", marginBottom: "15px" }}>
+                  <Briefcase
+                    size={18}
+                    style={{
+                      position: "absolute",
+                      left: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: colors.muted,
+                    }}
+                  />
+                  <input
+                    type="text"
+                    name="judgeIdOrUsername"
+                    value={formData.judgeIdOrUsername}
+                    placeholder="Judge ID or Username"
+                    required
+                    onChange={handleChange}
+                    style={{
+                      width: "calc(100% - 40px)",
+                      padding: "10px 10px 10px 35px",
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: "8px",
+                      outline: "none",
+                      fontSize: "14px",
+                      background: "none",
+                      color: colors.text,
+                      transition: "border-color 0.2s ease",
+                    }}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ position: "relative", marginBottom: "15px" }}>
+                  <User
+                    size={18}
+                    style={{
+                      position: "absolute",
+                      left: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: colors.muted,
+                    }}
+                  />
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    placeholder="Full Name"
+                    required
+                    onChange={handleChange}
+                    style={{
+                      width: "calc(100% - 40px)",
+                      padding: "10px 10px 10px 35px",
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: "8px",
+                      outline: "none",
+                      fontSize: "14px",
+                      background: "none",
+                      color: colors.text,
+                      transition: "border-color 0.2s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ position: "relative", marginBottom: "15px" }}>
+                  <Home
+                    size={18}
+                    style={{
+                      position: "absolute",
+                      left: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: colors.muted,
+                    }}
+                  />
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    placeholder="Address"
+                    required
+                    onChange={handleChange}
+                    style={{
+                      width: "calc(100% - 40px)",
+                      padding: "10px 10px 10px 35px",
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: "8px",
+                      outline: "none",
+                      fontSize: "14px",
+                      background: "none",
+                      color: colors.text,
+                      transition: "border-color 0.2s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ position: "relative", marginBottom: "15px" }}>
+                  <Mail
+                    size={18}
+                    style={{
+                      position: "absolute",
+                      left: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: colors.muted,
+                    }}
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    placeholder="Email"
+                    required
+                    onChange={handleChange}
+                    style={{
+                      width: "calc(100% - 40px)",
+                      padding: "10px 10px 10px 35px",
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: "8px",
+                      outline: "none",
+                      fontSize: "14px",
+                      background: "none",
+                      color: colors.text,
+                      transition: "border-color 0.2s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ position: "relative", marginBottom: "15px" }}>
+                  <User
+                    size={18}
+                    style={{
+                      position: "absolute",
+                      left: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: colors.muted,
+                    }}
+                  />
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    placeholder="Username"
+                    required
+                    onChange={handleChange}
+                    style={{
+                      width: "calc(100% - 40px)",
+                      padding: "10px 10px 10px 35px",
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: "8px",
+                      outline: "none",
+                      fontSize: "14px",
+                      background: "none",
+                      color: colors.text,
+                      transition: "border-color 0.2s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ position: "relative", marginBottom: "15px" }}>
+                  <Briefcase
+                    size={18}
+                    style={{
+                      position: "absolute",
+                      left: "10px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: colors.muted,
+                    }}
+                  />
+                  <input
+                    type="number"
+                    name="judgeId"
+                    value={formData.judgeId}
+                    placeholder="Judge ID"
+                    required
+                    onChange={handleChange}
+                    style={{
+                      width: "calc(100% - 40px)",
+                      padding: "10px 10px 10px 35px",
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: "8px",
+                      outline: "none",
+                      fontSize: "14px",
+                      background: "none",
+                      color: colors.text,
+                      transition: "border-color 0.2s ease",
+                    }}
+                  />
+                </div>
+              </>
+            )}
 
-          <div style={{ position: "relative", marginBottom: "15px" }}>
-            <Lock
-              size={18}
-              style={{
-                position: "absolute",
-                left: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#999",
-              }}
-            />
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              placeholder="Password"
-              required
-              onChange={handleChange}
-              style={{
-                width: "calc(100% - 40px)",
-                padding: "10px 10px 10px 35px",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                outline: "none",
-                fontSize: "14px",
-              }}
-            />
-          </div>
+            <div style={{ position: "relative", marginBottom: "15px" }}>
+              <Lock
+                size={18}
+                style={{
+                  position: "absolute",
+                  left: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: colors.muted,
+                }}
+              />
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                placeholder="Password"
+                required
+                onChange={handleChange}
+                style={{
+                  width: "calc(100% - 40px)",
+                  padding: "10px 10px 10px 35px",
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: "8px",
+                  outline: "none",
+                  fontSize: "14px",
+                  background: "none",
+                  color: colors.text,
+                  transition: "border-color 0.2s ease",
+                }}
+              />
+            </div>
+          </motion.div>
 
-          <button
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
             type="submit"
             disabled={isLoading}
             style={{
               width: "100%",
               padding: "12px",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: "#8B5CF6",
               color: "white",
               border: "none",
               borderRadius: "8px",
@@ -348,41 +445,30 @@ const JudgeSigninSignUp = () => {
               fontSize: "16px",
               fontWeight: "600",
               marginTop: "10px",
-              transition: "background 0.3s ease",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              boxShadow: darkMode
+                ? "0 4px 6px rgba(0, 0, 0, 0.2)"
+                : "0 4px 6px rgba(0, 0, 0, 0.1)",
             }}
-            onMouseOver={(e) => {
-              e.target.style.background =
-                "linear-gradient(135deg, #764ba2 0%, #667eea 100%)";
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background =
-                "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
-            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {isLoading ? "Processing..." : isLogin ? "Login" : "Sign up"}
-          </button>
+          </motion.button>
         </form>
 
-        <div style={{ marginTop: "20px", fontSize: "14px", color: "#666" }}>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.1 }}
+          style={{ marginTop: "20px", fontSize: "14px", color: colors.muted }}
+        >
           <p>
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <span
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError("");
-                setSuccess("");
-                setFormData({
-                  name: "",
-                  address: "",
-                  email: "",
-                  username: "",
-                  judgeId: "",
-                  password: "",
-                  judgeIdOrUsername: "",
-                });
-              }}
+              onClick={() => setIsLogin(!isLogin)}
               style={{
-                color: "#667eea",
+                color: colors.primary,
                 cursor: "pointer",
                 fontWeight: "600",
                 textDecoration: "underline",
@@ -391,9 +477,9 @@ const JudgeSigninSignUp = () => {
               {isLogin ? "Sign up" : "Login"}
             </span>
           </p>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sun,
   Moon,
@@ -11,6 +11,76 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ContactForm from "./ContactForm"; 
+
+class TypeWriter extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      text: "",
+      wordIndex: 0,
+      isDeleting: false,
+      isWaiting: false,
+    };
+  }
+
+  componentDidMount() {
+    this.type();
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.typeTimeout);
+  }
+
+  type = () => {
+    const { wordIndex, isDeleting, text } = this.state;
+    const currentIndex = wordIndex % this.props.words.length;
+    const currentWord = this.props.words[currentIndex];
+
+    this.setState({ isWaiting: false });
+
+    if (isDeleting) {
+      this.setState({
+        text: currentWord.substring(0, text.length - 1),
+      });
+    } else {
+      this.setState({
+        text: currentWord.substring(0, text.length + 1),
+      });
+    }
+
+    let typeSpeed = 100; // Increased typing speed
+
+    if (isDeleting) {
+      typeSpeed /= 2; // Faster erasure
+    }
+
+    if (!isDeleting && text === currentWord) {
+      typeSpeed = 1000; // Pause before deleting
+
+      this.setState({
+        isWaiting: true,
+        isDeleting: true,
+      });
+    } else if (isDeleting && text === "") {
+      this.setState({
+        isDeleting: false,
+        wordIndex: wordIndex + 1,
+      });
+      typeSpeed = 200; // Faster transition to next word
+    }
+
+    this.typeTimeout = setTimeout(() => this.type(), typeSpeed);
+  };
+
+  render() {
+    const { text, isWaiting } = this.state;
+
+    return (
+      <span className={`dynamic-text ${isWaiting ? "fade" : ""}`}>{text}</span>
+    );
+  }
+}
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -64,8 +134,8 @@ const Landing = () => {
 
   const navLinks = [
     { id: "home", label: "Home" },
-    { id: "features", label: "Features" },
     { id: "stats", label: "Stats" },
+    { id: "features", label: "Features" },
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" },
   ];
@@ -284,7 +354,7 @@ const Landing = () => {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              marginBottom: 24,
+              marginBottom: -60,
             }}
           >
             <span style={{ color: colors.primary, fontSize: 14 }}>
@@ -307,7 +377,11 @@ const Landing = () => {
           >
             AI-Powered Legal
             <br />
-            <span style={{ color: colors.primary }}>Case Management</span>
+            <span style={{ color: colors.primary }}>
+              <TypeWriter
+                words={["Case Management", "Bail Reckoner", "Case Predictor"]}
+              />
+            </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -321,8 +395,10 @@ const Landing = () => {
               lineHeight: 1.6,
             }}
           >
-            Transform legal workflows with predictive analytics and intelligent
-            case management
+            <div style={{ display: "inline-block" }}>
+              Transform legal workflows with predictive analytics and
+              intelligent case management
+            </div>
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
