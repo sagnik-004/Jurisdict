@@ -1,5 +1,5 @@
 import { Judge } from "../models/judge.model.js";
-import { Case } from "../models/case.model.js"; 
+import { Case } from "../models/case.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 
@@ -66,7 +66,7 @@ export const judgeLogin = async (req, res) => {
 
     // First try to find by username
     let judge = await Judge.findOne({ username: judgeIdOrUsername }).select("+password");
-    
+
     // If not found by username, try judgeId
     if (!judge) {
       judge = await Judge.findOne({ judgeId: judgeIdOrUsername }).select("+password");
@@ -98,16 +98,15 @@ export const judgeLogin = async (req, res) => {
 
 export const getCasesForJudge = async (req, res) => {
   try {
-    const { username } = req.params; // Retrieve judge's username from the URL parameter
+    const { username } = req.params;
 
-    // Fetch the cases assigned to this judge based on the judgeUsername field
-    const cases = await Case.find({ judgeUsername: username }).sort({ filingDate: -1 });  // Sort by filing date (most recent first)
-    
+    const cases = await Case.find({ judgeUsername: username }).sort({ filingDate: -1 });
+
     if (!cases || cases.length === 0) {
-      return res.status(404).json({ message: "No cases found for this judge." });
+      return res.status(200).json({ message: "No cases found for this judge.", cases: [] });
     }
 
-    res.status(200).json(cases);  // Return the cases
+    res.status(200).json(cases);
   } catch (error) {
     console.error("Error fetching cases for judge:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -116,18 +115,18 @@ export const getCasesForJudge = async (req, res) => {
 
 export const getBailAppeals = async (req, res) => {
   try {
-    const { username } = req.params; // Retrieve judge's username from the URL parameter
+    const { username } = req.params;
 
     const bailAppeals = await Case.find(
       { judgeUsername: username, bailStatus: "Pending to judge" },
-      "caseId caseTitle detaineeName detaineeUsername groundsOfBail bailFilingDate judgeComments caseSummary status" // Removed aiRecommendation
+      "caseId caseTitle detaineeName detaineeUsername groundsOfBail bailFilingDate judgeComments caseSummary status"
     ).sort({ filingDate: -1 });
 
     if (!bailAppeals || bailAppeals.length === 0) {
-      return res.status(404).json({ message: "No bail appeals found for this judge." });
+      return res.status(200).json({ message: "No bail appeals found for this judge.", bailAppeals: [] });
     }
 
-    res.status(200).json(bailAppeals);  // Return the bail appeals with the case summary
+    res.status(200).json(bailAppeals);
   } catch (error) {
     console.error("Error fetching bail appeals for judge:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -136,18 +135,18 @@ export const getBailAppeals = async (req, res) => {
 
 export const getDecidedCases = async (req, res) => {
   try {
-    const { username } = req.params; // Retrieve judge's username from the URL parameter
+    const { username } = req.params;
 
     const decidedCases = await Case.find(
       { judgeUsername: username, bailStatus: { $in: ["Accepted", "Declined"] } },
-      "caseId caseTitle detaineeName detaineeUsername groundsOfBail bailFilingDate judgeComments caseSummary bailStatus" // Include bailStatus
+      "caseId caseTitle detaineeName detaineeUsername groundsOfBail bailFilingDate judgeComments caseSummary bailStatus"
     ).sort({ filingDate: -1 });
 
     if (!decidedCases || decidedCases.length === 0) {
-      return res.status(404).json({ message: "No decided cases found for this judge." });
+      return res.status(200).json({ message: "No decided cases found for this judge.", decidedCases: [] });
     }
 
-    res.status(200).json(decidedCases);  // Return the decided cases
+    res.status(200).json(decidedCases);
   } catch (error) {
     console.error("Error fetching decided cases for judge:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -156,34 +155,34 @@ export const getDecidedCases = async (req, res) => {
 
 export const bailDecision = async (req, res) => {
   try {
-      const { caseId, status, comments } = req.body;
+    const { caseId, status, comments } = req.body;
 
-      // Ensure that status is either "Accepted" or "Declined"
-      if (!["Accepted", "Declined"].includes(status)) {
-          return res.status(400).json({ message: "Invalid bail status" });
-      }
+    // Ensure that status is either "Accepted" or "Declined"
+    if (!["Accepted", "Declined"].includes(status)) {
+      return res.status(400).json({ message: "Invalid bail status" });
+    }
 
-      // Convert comments from CSV string to array (if provided)
-      const commentArray = comments ? comments.split(",").map(comment => comment.trim()) : [];
+    // Convert comments from CSV string to array (if provided)
+    const commentArray = comments ? comments.split(",").map(comment => comment.trim()) : [];
 
-      // Find the case and update its bailStatus and judgeComments
-      const updatedCase = await Case.findByIdAndUpdate(
-          caseId,
-          {
-              bailStatus: status,
-              judgeComments: commentArray
-          },
-          { new: true } // Return the updated document
-      );
+    // Find the case and update its bailStatus and judgeComments
+    const updatedCase = await Case.findByIdAndUpdate(
+      caseId,
+      {
+        bailStatus: status,
+        judgeComments: commentArray,
+      },
+      { new: true } // Return the updated document
+    );
 
-      if (!updatedCase) {
-          return res.status(404).json({ message: "Case not found" });
-      }
+    if (!updatedCase) {
+      return res.status(404).json({ message: "Case not found" });
+    }
 
-      res.status(200).json({ message: "Bail decision updated successfully", case: updatedCase });
+    res.status(200).json({ message: "Bail decision updated successfully", case: updatedCase });
   } catch (error) {
-      console.error("Error updating bail decision:", error);
-      res.status(500).json({ message: "Internal server error" });
+    console.error("Error updating bail decision:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

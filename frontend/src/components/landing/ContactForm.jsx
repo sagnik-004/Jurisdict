@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFacebook, faTwitter, faInstagram, faGooglePlusG } from "@fortawesome/free-brands-svg-icons";
+import { motion } from "framer-motion";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
-const ContactForm = () => {
+const ContactForm = ({ darkMode, colors }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,40 +24,87 @@ const ContactForm = () => {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "#F8FAF6",
+        backgroundColor: darkMode ? "#1E293B" : "#F8FAFC",
         padding: "40px",
         borderRadius: "8px",
-        Width: "100%",
+        width: "95%",
         margin: "auto",
+        border: `1px solid ${colors.border}`,
       }}
     >
-      {/* Left Section: Contact Info */}
       <div style={{ width: "40%", paddingRight: "20px" }}>
-        <h2 style={{fontSize: "24px", fontWeight: "600", marginBottom: "10px" }}>Contact Us</h2>
-        <p style={{ color: "#555" }}>Our mailing address is:</p>
-        <p style={{ color: "#444", marginBottom: "8px" }}>152A Charlotte Street, Peterborough ON</p>
-        <p style={{ color: "#444", fontWeight: "bold" }}>Phone: 705-742-3221</p>
-
-        {/* Social Media Icons */}
+        <h2
+          style={{ fontSize: "24px", fontWeight: "600", marginBottom: "10px" }}
+        >
+          Contact Us
+        </h2>
+        <p style={{ color: colors.muted }}>Our mailing address is:</p>
+        <p style={{ color: colors.muted, marginBottom: "8px" }}>
+          152A Charlotte Street, Peterborough ON
+        </p>
+        <p style={{ color: colors.muted, fontWeight: "bold" }}>
+          Phone: 705-742-3221
+        </p>
         <div style={{ marginTop: "10px", display: "flex", gap: "15px" }}>
-          <a href="#" style={{ fontSize: "20px", color: "#333" }}>
-            <FontAwesomeIcon icon={faFacebook} />
+          <a
+            href="#"
+            style={{
+              fontSize: "20px",
+              color: colors.muted,
+              transition: "all 0.2s ease",
+              ":hover": { color: colors.primary },
+            }}
+          >
+            <Facebook size={20} />
           </a>
-          <a href="#" style={{ fontSize: "20px", color: "#333" }}>
-            <FontAwesomeIcon icon={faTwitter} />
+          <a
+            href="#"
+            style={{
+              fontSize: "20px",
+              color: colors.muted,
+              transition: "all 0.2s ease",
+              ":hover": { color: colors.primary },
+            }}
+          >
+            <Twitter size={20} />
           </a>
-          <a href="#" style={{ fontSize: "20px", color: "#333" }}>
-            <FontAwesomeIcon icon={faInstagram} />
+          <a
+            href="#"
+            style={{
+              fontSize: "20px",
+              color: colors.muted,
+              transition: "all 0.2s ease",
+              ":hover": { color: colors.primary },
+            }}
+          >
+            <Instagram size={20} />
           </a>
-          <a href="#" style={{ fontSize: "20px", color: "#333" }}>
-            <FontAwesomeIcon icon={faGooglePlusG} />
+          <a
+            href="#"
+            style={{
+              fontSize: "20px",
+              color: colors.muted,
+              transition: "all 0.2s ease",
+              ":hover": { color: colors.primary },
+            }}
+          >
+            <Linkedin size={20} />
           </a>
         </div>
       </div>
 
-      {/* Right Section: Contact Form */}
-      <div style={{ width: "55%", backgroundColor: "#fff", padding: "20px", borderRadius: "8px", boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)" }}>
-        <p style={{ color: "#555", marginBottom: "15px" }}>
+      <div
+        style={{
+          width: "55%",
+          backgroundColor: colors.background,
+          padding: "20px",
+          borderRadius: "8px",
+          boxShadow: darkMode
+            ? "0px 0px 10px rgba(255, 255, 255, 0.1)"
+            : "0px 0px 10px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <p style={{ color: colors.muted, marginBottom: "15px" }}>
           <strong>Great vision without great people is irrelevant.</strong>
           <br />
           Let's work together.
@@ -70,12 +117,14 @@ const ContactForm = () => {
             value={formData.name}
             onChange={handleChange}
             style={{
-              width: "640px",
+              width: "100%",
               padding: "10px",
               marginBottom: "10px",
-              border: "1px solid #ccc",
+              border: `1px solid ${colors.border}`,
               borderRadius: "4px",
               fontSize: "14px",
+              backgroundColor: colors.background,
+              color: colors.text,
             }}
             required
           />
@@ -86,12 +135,14 @@ const ContactForm = () => {
             value={formData.email}
             onChange={handleChange}
             style={{
-              width: "640px",
+              width: "100%",
               padding: "10px",
               marginBottom: "10px",
-              border: "1px solid #ccc",
+              border: `1px solid ${colors.border}`,
               borderRadius: "4px",
               fontSize: "14px",
+              backgroundColor: colors.background,
+              color: colors.text,
             }}
             required
           />
@@ -101,20 +152,24 @@ const ContactForm = () => {
             value={formData.message}
             onChange={handleChange}
             style={{
-              width: "640px",
+              width: "100%",
               padding: "10px",
               marginBottom: "10px",
-              border: "1px solid #ccc",
+              border: `1px solid ${colors.border}`,
               borderRadius: "4px",
               fontSize: "14px",
               height: "80px",
+              backgroundColor: colors.background,
+              color: colors.text,
             }}
             required
           />
-          <button
+          <motion.button
             type="submit"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             style={{
-              backgroundColor: "#8B5CF6",
+              backgroundColor: colors.primary,
               color: "white",
               padding: "10px 20px",
               border: "none",
@@ -124,7 +179,7 @@ const ContactForm = () => {
             }}
           >
             Submit
-          </button>
+          </motion.button>
         </form>
       </div>
     </div>
