@@ -8,10 +8,11 @@ import {
   Gavel,
   Scale,
   Lock,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ContactForm from "./ContactForm";
-
 
 class TypeWriter extends React.Component {
   constructor(props) {
@@ -399,10 +400,10 @@ const Landing = () => {
             }}
           >
             <span style={{ color: colors.primary, fontSize: 14 }}>
-              AI-powered case management
+              Get bailed out
             </span>
             <span style={{ color: colors.secondary, fontSize: 14 }}>
-              ✨ New Feature
+              ✨ real quick
             </span>
           </motion.div>
           <motion.h1
@@ -437,8 +438,7 @@ const Landing = () => {
             }}
           >
             <div style={{ display: "inline-block" }}>
-              Transform legal workflows with predictive analytics and
-              intelligent case management
+              Bail Decisions and Intelligent Case Management- Faster Than Ever
             </div>
           </motion.p>
           <motion.div
@@ -576,7 +576,7 @@ const Landing = () => {
                 zIndex: 1000,
               }}
             >
-              {"<"}
+              <ArrowLeft size={16} />
             </motion.button>
             <motion.button
               onClick={handleNextFeature}
@@ -596,7 +596,7 @@ const Landing = () => {
                 zIndex: 1000,
               }}
             >
-              {">"}
+              <ArrowRight size={16} />
             </motion.button>
             <div
               style={{
@@ -783,8 +783,7 @@ const Landing = () => {
         </motion.div>
       </section>
 
-       {/* Contact Section */}
-       <section id="contact" style={{ padding: "80px 32px" }}>
+      <section id="contact" style={{ padding: "80px 32px" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -802,7 +801,7 @@ const Landing = () => {
           >
             Contact Us
           </h2>
-          <ContactForm /> {/* Insert the ContactForm component here */}
+          <ContactForm darkMode={darkMode} colors={colors} />
         </motion.div>
       </section>
 
@@ -831,7 +830,7 @@ const Landing = () => {
               JurisDict
             </h3>
             <p style={{ color: colors.muted, lineHeight: 1.6 }}>
-              Transforming legal practice through AI-powered solutions
+              Bail Decisions and Intelligent Case Management—Faster Than Ever
             </p>
           </div>
           <div>
