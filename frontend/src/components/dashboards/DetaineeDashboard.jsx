@@ -178,7 +178,7 @@ const DetaineeDashboard = () => {
                   color: themeColors.text,
                 }}
               >
-                Themisync
+                JurisDict
               </h1>
             </div>
           </div>
