@@ -1,12 +1,12 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
-import Lawyer from '../models/lawyer.model.js';
+import {Lawyer} from '../models/lawyer.model.js';
 
 const router = express.Router();
 
 router.use(cors({
-    origin: 'https://themisynctest.pages.dev',
+    origin: 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

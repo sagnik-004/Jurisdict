@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, userType }) => {
     const verifyUser = async () => {
       try {
         const response = await axios.get(
-          "https://themisynctest.onrender.com/auth/refresh",
+          "http://localhost:5001/auth/refresh",
           {
             withCredentials: true,
             headers: {

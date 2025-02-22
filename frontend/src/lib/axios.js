@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-    baseURL: "https://themisynctest.onrender.com",
+    baseURL: "http://localhost:5001",
     withCredentials: true,
      headers: {
         'Content-Type': 'application/json'
