@@ -15,6 +15,9 @@ import {
   ThemeProvider,
   createTheme,
   CssBaseline,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import {
   AddCircleOutline,
@@ -26,6 +29,7 @@ import {
   Brightness4,
   Brightness7,
   Logout,
+  ExpandMore,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../lib/axios.js";
@@ -186,6 +190,12 @@ const LawyerDashboard = () => {
       backgroundColor: mode === "light" ? "#fff" : "#333",
       color: mode === "light" ? "#000" : "#fff",
     },
+    faqSection: {
+      marginTop: "24px",
+    },
+    faqItem: {
+      marginBottom: "8px",
+    },
   };
 
   const menuItems = [
@@ -194,6 +204,49 @@ const LawyerDashboard = () => {
     { text: "Track Bail Status", icon: <TrackChanges /> },
     { text: "BNS", icon: <Gavel /> },
     { text: "FAQs", icon: <HelpOutline /> },
+  ];
+
+  const faqs = [
+    {
+      question: "How do I add a new case?",
+      answer: "To add a new case, navigate to the 'Add Case' section and fill in the required details such as Case ID, Case Title, BNS Section, Court Name, and other relevant information. Once all fields are filled, click 'Submit Case' to save the case.",
+    },
+    {
+      question: "How can I track the status of a bail application?",
+      answer: "You can track the status of a bail application by navigating to the 'Track Bail Status' section. Enter the relevant case details to view the current status of the bail application.",
+    },
+    {
+      question: "What information is required to file a new case?",
+      answer: "To file a new case, you need to provide details such as Case ID, Case Title, BNS Section, Court Name, Judge ID, Filing Date, Hearing Dates, Police Station, Case Summary, Detainee ID, Bail Filing Date, and Grounds for Bail.",
+    },
+    {
+      question: "How do I view my ongoing cases?",
+      answer: "You can view your ongoing cases by navigating to the 'Ongoing Cases' section. This section will display a list of all your active cases along with their details.",
+    },
+    {
+      question: "Can I edit a case after submitting it?",
+      answer: "Currently, once a case is submitted, it cannot be edited. Please ensure all details are correct before submitting the case.",
+    },
+    {
+      question: "How do I log out of the dashboard?",
+      answer: "To log out, click on the logout icon located in the bottom-right corner of the sidebar. This will log you out of the dashboard and redirect you to the landing page.",
+    },
+    {
+      question: "What is the BNS section?",
+      answer: "The BNS section refers to the Bharatiya Nyaya Sanhita, which is a code of criminal law in India. You can use this section to reference relevant legal provisions for your cases.",
+    },
+    {
+      question: "How do I change the theme of the dashboard?",
+      answer: "You can switch between light and dark themes by clicking on the theme toggle icon located at the top-right corner of the dashboard.",
+    },
+    {
+      question: "What should I do if I encounter an error?",
+      answer: "If you encounter an error, please try refreshing the page. If the issue persists, contact the support team for assistance.",
+    },
+    {
+      question: "How do I navigate between different sections of the dashboard?",
+      answer: "You can navigate between different sections by clicking on the respective menu items in the sidebar. Each section is designed to help you manage different aspects of your cases.",
+    },
   ];
 
   return (
@@ -417,6 +470,21 @@ const LawyerDashboard = () => {
 
           {selectedItem === "Track Bail Status" && (
             <LawyerTrackBail />
+          )}
+
+          {selectedItem === "FAQs" && (
+            <Box sx={styles.faqSection}>
+              {faqs.map((faq, index) => (
+                <Accordion key={index} sx={styles.faqItem}>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography variant="h6">{faq.question}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography variant="body1">{faq.answer}</Typography>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </Box>
           )}
         </Box>
 
