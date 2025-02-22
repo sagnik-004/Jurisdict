@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sun,
   Moon,
@@ -62,8 +63,8 @@ const Landing = () => {
 
   const navLinks = [
     { id: "home", label: "Home" },
-    { id: "features", label: "Features" },
     { id: "stats", label: "Stats" },
+    { id: "features", label: "Features" },
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" },
   ];
@@ -111,16 +112,21 @@ const Landing = () => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 48 }}>
-            <h1
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
               style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}
             >
               JurisDict
-            </h1>
+            </motion.h1>
             <div style={{ display: "flex", gap: 24 }}>
               {navLinks.map((link) => (
-                <button
+                <motion.button
                   key={link.id}
                   onClick={() => scrollToSection(link.id)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   style={{
                     fontSize: 14,
                     fontWeight: 500,
@@ -141,14 +147,16 @@ const Landing = () => {
                   }}
                 >
                   {link.label}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <button
+            <motion.button
               onClick={() => setDarkMode(!darkMode)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               style={{
                 padding: 8,
                 borderRadius: 8,
@@ -156,9 +164,6 @@ const Landing = () => {
                 background: "none",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-                ":hover": {
-                  backgroundColor: darkMode ? "#2D3748" : "#F1F5F9",
-                },
               }}
             >
               {darkMode ? (
@@ -166,13 +171,15 @@ const Landing = () => {
               ) : (
                 <Moon size={18} />
               )}
-            </button>
+            </motion.button>
 
             <div ref={menuRef} style={{ position: "relative" }}>
-              <button
+              <motion.button
                 onMouseEnter={() => setButtonHover({ register: true })}
                 onMouseLeave={() => setButtonHover({ register: false })}
                 onClick={() => setShowRegisterMenu(!showRegisterMenu)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 style={{
                   padding: "8px 16px",
                   borderRadius: 8,
@@ -189,51 +196,59 @@ const Landing = () => {
                 <UserPlus size={16} />
                 <span>Sign Up</span>
                 <ChevronDown size={16} />
-              </button>
+              </motion.button>
 
-              {showRegisterMenu && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 48,
-                    right: 0,
-                    backgroundColor: colors.background,
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: 12,
-                    padding: 8,
-                    width: 200,
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                    zIndex: 1000,
-                  }}
-                >
-                  {roles.map((role, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleRoleNavigation(role.name)}
-                      style={{
-                        width: "100%",
-                        padding: "12px 16px",
-                        borderRadius: 8,
-                        background: "none",
-                        border: "none",
-                        color: colors.text,
-                        textAlign: "left",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        transition: "all 0.2s ease",
-                        ":hover": {
-                          backgroundColor: darkMode ? "#2D3748" : "#F1F5F9",
-                        },
-                      }}
-                    >
-                      {role.icon}
-                      {role.name}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <AnimatePresence>
+                {showRegisterMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      position: "absolute",
+                      top: 48,
+                      right: 0,
+                      backgroundColor: colors.background,
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: 12,
+                      padding: 8,
+                      width: 200,
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                      zIndex: 1000,
+                    }}
+                  >
+                    {roles.map((role, index) => (
+                      <motion.button
+                        key={index}
+                        onClick={() => handleRoleNavigation(role.name)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        style={{
+                          width: "100%",
+                          padding: "12px 16px",
+                          borderRadius: 8,
+                          background: "none",
+                          border: "none",
+                          color: colors.text,
+                          textAlign: "left",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          transition: "all 0.2s ease",
+                          ":hover": {
+                            backgroundColor: darkMode ? "#2D3748" : "#F1F5F9",
+                          },
+                        }}
+                      >
+                        {role.icon}
+                        {role.name}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -243,14 +258,22 @@ const Landing = () => {
         id="home"
         style={{
           height: "100vh",
-          padding: "16px 32px 80px",
+          padding: "200px 32px 80px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <div style={{ maxWidth: 1024, textAlign: "center" }}>
-          <div
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          style={{ maxWidth: 1024, textAlign: "center" }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
             style={{
               padding: "12px 20px",
               borderRadius: 24,
@@ -267,8 +290,11 @@ const Landing = () => {
             <span style={{ color: colors.secondary, fontSize: 14 }}>
               ✨ New Feature
             </span>
-          </div>
-          <h1
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
             style={{
               fontSize: 64,
               fontWeight: 700,
@@ -279,8 +305,11 @@ const Landing = () => {
             AI-Powered Legal
             <br />
             <span style={{ color: colors.primary }}>Case Management</span>
-          </h1>
-          <p
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
             style={{
               fontSize: 20,
               color: colors.muted,
@@ -291,10 +320,17 @@ const Landing = () => {
           >
             Transform legal workflows with predictive analytics and intelligent
             case management
-          </p>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-            <button
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            style={{ display: "flex", gap: 16, justifyContent: "center" }}
+          >
+            <motion.button
               onClick={() => scrollToSection("features")}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               style={{
                 padding: "16px 32px",
                 borderRadius: 8,
@@ -305,15 +341,12 @@ const Landing = () => {
                 fontWeight: 500,
                 cursor: "pointer",
                 transition: "all 0.2s ease",
-                ":hover": {
-                  background: "#4F46E5",
-                },
               }}
             >
               Learn More
-            </button>
-          </div>
-        </div>
+            </motion.button>
+          </motion.div>
+        </motion.div>
       </section>
 
       <section
@@ -323,7 +356,13 @@ const Landing = () => {
           backgroundColor: darkMode ? "#1E293B" : "#F8FAFC",
         }}
       >
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          style={{ maxWidth: 1280, margin: "0 auto" }}
+        >
           <h2
             style={{
               fontSize: 40,
@@ -347,8 +386,12 @@ const Landing = () => {
               { value: "2.4M", label: "Legal Documents", color: "#8B5CF6" },
               { value: "98%", label: "User Satisfaction", color: "#EC4899" },
             ].map((stat, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
                 style={{
                   padding: 32,
                   borderRadius: 16,
@@ -370,14 +413,20 @@ const Landing = () => {
                 <div style={{ fontSize: 18, color: colors.muted }}>
                   {stat.label}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <section id="features" style={{ padding: "80px 32px" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          style={{ maxWidth: 1280, margin: "0 auto" }}
+        >
           <h2
             style={{
               fontSize: 40,
@@ -411,8 +460,12 @@ const Landing = () => {
                 description: "Real-time updates and deadline management system",
               },
             ].map((feature, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
                 style={{
                   padding: 32,
                   borderRadius: 16,
@@ -424,10 +477,10 @@ const Landing = () => {
                   {feature.title}
                 </h3>
                 <p style={{ color: colors.muted }}>{feature.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <footer
@@ -437,7 +490,11 @@ const Landing = () => {
           borderTop: `1px solid ${colors.border}`,
         }}
       >
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
           style={{
             maxWidth: 1280,
             margin: "0 auto",
@@ -517,8 +574,12 @@ const Landing = () => {
               ))}
             </div>
           </div>
-        </div>
-        <div
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
           style={{
             marginTop: 48,
             paddingTop: 32,
@@ -528,7 +589,7 @@ const Landing = () => {
           }}
         >
           © {new Date().getFullYear()} JurisDict. All rights reserved.
-        </div>
+        </motion.div>
       </footer>
     </div>
   );
