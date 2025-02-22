@@ -278,7 +278,104 @@ const LawyerDashboard = () => {
 
           {selectedItem === "Add Case" && (
             <Box>
-              {/* Add Case Form Fields - Keep existing form fields here */}
+              <TextField
+                fullWidth
+                label="Case ID"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Case Title"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="BNS Section"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Court Name"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Judge ID"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Filing Date"
+                type="date"
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Hearing Dates"
+                type="date"
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Police Station"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <Box sx={{ marginBottom: "24px" }}>
+                <Typography variant="body1" sx={{ marginBottom: "8px" }}>
+                  Case Summary (Minimum 250 words)
+                </Typography>
+                <TextareaAutosize
+                  minRows={4}
+                  placeholder="Enter case summary..."
+                  value={caseSummary}
+                  onChange={handleCaseSummaryChange}
+                  style={styles.textArea}
+                />
+              </Box>
+              <TextField
+                fullWidth
+                label="Detainee ID"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Bail Filing Date"
+                type="date"
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                sx={styles.inputField}
+              />
+              <TextField
+                fullWidth
+                label="Grounds for Bail"
+                variant="outlined"
+                sx={styles.inputField}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ 
+                  marginTop: "16px",
+                  borderRadius: "8px",
+                  padding: "12px 24px",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                }}
+                onClick={handleSubmit}
+              >
+                Submit Case
+              </Button>
             </Box>
           )}
 
