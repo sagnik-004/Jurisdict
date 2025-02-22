@@ -1,18 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Sun, Moon, UserPlus, LogIn, ChevronDown } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  UserPlus,
+  ChevronDown,
+  Gavel,
+  Scale,
+  Lock,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
-  const [showLoginMenu, setShowLoginMenu] = useState(false);
   const [showRegisterMenu, setShowRegisterMenu] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isScrolled, setIsScrolled] = useState(false);
   const [buttonHover, setButtonHover] = useState({});
   const menuRef = useRef(null);
 
-  const roles = ["Lawyer", "Judge", "Detainee"];
+  const roles = [
+    { name: "Lawyer", icon: <Gavel size={16} /> },
+    { name: "Judge", icon: <Scale size={16} /> },
+    { name: "Detainee", icon: <Lock size={16} /> },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,7 +39,6 @@ const Landing = () => {
 
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowLoginMenu(false);
         setShowRegisterMenu(false);
       }
     };
@@ -53,7 +63,6 @@ const Landing = () => {
   const navLinks = [
     { id: "home", label: "Home" },
     { id: "features", label: "Features" },
-    { id: "solutions", label: "Solutions" },
     { id: "stats", label: "Stats" },
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" },
@@ -67,7 +76,6 @@ const Landing = () => {
   const handleRoleNavigation = (role) => {
     const path = `/${role.charAt(0).toLowerCase()}/register`;
     navigate(path);
-    setShowLoginMenu(false);
     setShowRegisterMenu(false);
   };
 
@@ -106,7 +114,7 @@ const Landing = () => {
             <h1
               style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}
             >
-              Themisync
+              JurisDict
             </h1>
             <div style={{ display: "flex", gap: 24 }}>
               {navLinks.map((link) => (
@@ -130,9 +138,6 @@ const Landing = () => {
                           : "rgba(99, 102, 241, 0.05)"
                         : "transparent",
                     transition: "all 0.2s ease",
-                    ":hover": {
-                      color: colors.primary,
-                    },
                   }}
                 >
                   {link.label}
@@ -147,7 +152,7 @@ const Landing = () => {
               style={{
                 padding: 8,
                 borderRadius: 8,
-                border: `1px solid ${colors.border}`,
+                border: `1px solid ${darkMode ? "#FFFFFF" : colors.border}`,
                 background: "none",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
@@ -156,56 +161,18 @@ const Landing = () => {
                 },
               }}
             >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              {darkMode ? (
+                <Sun size={18} color="#FFFFFF" />
+              ) : (
+                <Moon size={18} />
+              )}
             </button>
 
-            <div
-              ref={menuRef}
-              style={{ position: "relative", display: "flex", gap: 12 }}
-            >
+            <div ref={menuRef} style={{ position: "relative" }}>
               <button
-                onMouseEnter={() =>
-                  setButtonHover({ ...buttonHover, login: true })
-                }
-                onMouseLeave={() =>
-                  setButtonHover({ ...buttonHover, login: false })
-                }
-                onClick={() => {
-                  setShowLoginMenu(!showLoginMenu);
-                  setShowRegisterMenu(false);
-                }}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: `1px solid ${colors.border}`,
-                  background: buttonHover.login
-                    ? darkMode
-                      ? "#2D3748"
-                      : "#F1F5F9"
-                    : "transparent",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <LogIn size={16} />
-                <span>Login</span>
-                <ChevronDown size={16} />
-              </button>
-
-              <button
-                onMouseEnter={() =>
-                  setButtonHover({ ...buttonHover, register: true })
-                }
-                onMouseLeave={() =>
-                  setButtonHover({ ...buttonHover, register: false })
-                }
-                onClick={() => {
-                  setShowRegisterMenu(!showRegisterMenu);
-                  setShowLoginMenu(false);
-                }}
+                onMouseEnter={() => setButtonHover({ register: true })}
+                onMouseLeave={() => setButtonHover({ register: false })}
+                onClick={() => setShowRegisterMenu(!showRegisterMenu)}
                 style={{
                   padding: "8px 16px",
                   borderRadius: 8,
@@ -220,53 +187,9 @@ const Landing = () => {
                 }}
               >
                 <UserPlus size={16} />
-                <span>Register</span>
+                <span>Sign Up</span>
                 <ChevronDown size={16} />
               </button>
-
-              {showLoginMenu && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 48,
-                    right: 0,
-                    backgroundColor: colors.background,
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: 12,
-                    padding: 8,
-                    width: 200,
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                    zIndex: 1000,
-                  }}
-                >
-                  {roles.map((role, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleRoleNavigation(role)}
-                      style={{
-                        width: "100%",
-                        padding: "12px 16px",
-                        borderRadius: 8,
-                        background: "none",
-                        border: "none",
-                        color: colors.text,
-                        textAlign: "left",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        transition: "all 0.2s ease",
-                        ":hover": {
-                          backgroundColor: darkMode ? "#2D3748" : "#F1F5F9",
-                        },
-                      }}
-                    >
-                      <LogIn size={16} />
-                      {role}
-                    </button>
-                  ))}
-                </div>
-              )}
 
               {showRegisterMenu && (
                 <div
@@ -286,7 +209,7 @@ const Landing = () => {
                   {roles.map((role, index) => (
                     <button
                       key={index}
-                      onClick={() => handleRoleNavigation(role)}
+                      onClick={() => handleRoleNavigation(role.name)}
                       style={{
                         width: "100%",
                         padding: "12px 16px",
@@ -305,8 +228,8 @@ const Landing = () => {
                         },
                       }}
                     >
-                      <UserPlus size={16} />
-                      {role}
+                      {role.icon}
+                      {role.name}
                     </button>
                   ))}
                 </div>
@@ -319,8 +242,8 @@ const Landing = () => {
       <section
         id="home"
         style={{
-          minHeight: "100vh",
-          padding: "160px 32px 80px",
+          height: "100vh",
+          padding: "16px 32px 80px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -371,6 +294,7 @@ const Landing = () => {
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
             <button
+              onClick={() => scrollToSection("features")}
               style={{
                 padding: "16px 32px",
                 borderRadius: 8,
@@ -443,12 +367,7 @@ const Landing = () => {
                 >
                   {stat.value}
                 </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    color: colors.muted,
-                  }}
-                >
+                <div style={{ fontSize: 18, color: colors.muted }}>
                   {stat.label}
                 </div>
               </div>
@@ -501,13 +420,7 @@ const Landing = () => {
                   border: `1px solid ${colors.border}`,
                 }}
               >
-                <h3
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 600,
-                    marginBottom: 16,
-                  }}
-                >
+                <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>
                   {feature.title}
                 </h3>
                 <p style={{ color: colors.muted }}>{feature.description}</p>
@@ -535,7 +448,7 @@ const Landing = () => {
         >
           <div>
             <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>
-              Themisync
+              JurisDict
             </h3>
             <p style={{ color: colors.muted, lineHeight: 1.6 }}>
               Transforming legal practice through AI-powered solutions
@@ -546,24 +459,20 @@ const Landing = () => {
               Product
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {["Features", "Solutions", "Pricing", "Docs"].map(
-                (item, index) => (
-                  <a
-                    key={index}
-                    href="#"
-                    style={{
-                      color: colors.muted,
-                      textDecoration: "none",
-                      transition: "all 0.2s ease",
-                      ":hover": {
-                        color: colors.primary,
-                      },
-                    }}
-                  >
-                    {item}
-                  </a>
-                )
-              )}
+              {["Features", "Pricing", "Docs"].map((item, index) => (
+                <a
+                  key={index}
+                  href="#"
+                  style={{
+                    color: colors.muted,
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                    ":hover": { color: colors.primary },
+                  }}
+                >
+                  {item}
+                </a>
+              ))}
             </div>
           </div>
           <div>
@@ -579,9 +488,7 @@ const Landing = () => {
                     color: colors.muted,
                     textDecoration: "none",
                     transition: "all 0.2s ease",
-                    ":hover": {
-                      color: colors.primary,
-                    },
+                    ":hover": { color: colors.primary },
                   }}
                 >
                   {item}
@@ -602,9 +509,7 @@ const Landing = () => {
                     color: colors.muted,
                     textDecoration: "none",
                     transition: "all 0.2s ease",
-                    ":hover": {
-                      color: colors.primary,
-                    },
+                    ":hover": { color: colors.primary },
                   }}
                 >
                   {item}
@@ -622,7 +527,7 @@ const Landing = () => {
             color: colors.muted,
           }}
         >
-          © {new Date().getFullYear()} Themisync. All rights reserved.
+          © {new Date().getFullYear()} JurisDict. All rights reserved.
         </div>
       </footer>
     </div>
