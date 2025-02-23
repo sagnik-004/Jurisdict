@@ -15,10 +15,22 @@ sys.path.append(project_root)
 # Import the processors
 from ml_backend.utils.JudgeCaseProcessor import JudgeCaseProcessor
 from ml_backend.utils.LawyerCaseProcessor import LawyerCaseProcessor
-from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor  # Import detainee processor
+from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor
 
+# Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS to allow requests from your frontend domain
+CORS(
+    app,
+    resources={
+        r"/process_case*": {
+            "origins": ["https://jurisdict.pages.dev"],
+            "methods": ["POST", "OPTIONS"],
+            "allow_headers": ["Content-Type"]
+        }
+    }
+)
 
 @app.route('/process_case_judge', methods=['POST'])
 def process_case_judge():
