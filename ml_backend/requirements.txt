@@ -121,7 +121,6 @@ PySocks==1.7.1
 python-dateutil==2.8.2
 python-dotenv==1.0.1
 pytz==2024.1
-pywin32==308
 PyYAML==6.0.2
 pyzmq==26.2.0
 readchar==4.2.0
