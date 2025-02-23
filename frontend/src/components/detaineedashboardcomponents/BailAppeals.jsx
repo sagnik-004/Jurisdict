@@ -8,12 +8,22 @@ import {
   Box,
   Tabs,
   Tab,
-  Grid
+  Grid,
+  Collapse,
+  IconButton,
+  Button
 } from "@mui/material";
+import { HelpOutline, ExpandMore, ExpandLess } from "@mui/icons-material";
+import AIPopup_lawyer from "../common/Aipopup_lawyer.jsx";
 
 const BailAppeals = ({ themeColors }) => {
   const [bailCases, setBailCases] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [expandedCaseId, setExpandedCaseId] = useState(null);
+  const [aiResponse, setAiResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [aiPopupOpen, setAiPopupOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
@@ -29,6 +39,48 @@ const BailAppeals = ({ themeColors }) => {
     };
     fetchBailCases();
   }, [user.username]);
+
+  const toggleExpand = (caseId) => {
+    setExpandedCaseId((prev) => (prev === caseId ? null : caseId));
+  };
+
+  const handleAskAI = async (caseId, groundsOfBail, caseSummary) => {
+    setLoading(true);
+    setError(null);
+    setAiResponse(null);
+    setAiPopupOpen(true);
+
+    try {
+      const response = await fetch("https://jurisdict-8nns.onrender.com/process_case_detainee", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          groundsOfBail,
+          caseSummary,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch AI response");
+      }
+
+      const data = await response.json();
+      setAiResponse(data);
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+      setError("Failed to fetch AI response. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseAiPopup = () => {
+    setAiPopupOpen(false);
+    setAiResponse(null);
+    setError(null);
+  };
 
   if (!bailCases) {
     return (
@@ -90,23 +142,64 @@ const BailAppeals = ({ themeColors }) => {
                   sx={{ 
                     mb: 2, 
                     backgroundColor: themeColors.cardBg,
-                    cursor: "pointer",
                     transition: "transform 0.2s",
-                    "&:hover": {
-                      transform: "translateX(5px)"
-                    }
                   }}
                 >
                   <CardContent>
-                    <Typography variant="h6" style={{ color: themeColors.cardText }}>
-                      {caseItem.caseTitle}
-                    </Typography>
-                    <Typography variant="body2" style={{ color: themeColors.cardText }}>
-                      Case ID: {caseItem.caseId}
-                    </Typography>
-                    <Typography variant="caption" style={{ color: themeColors.cardText }}>
-                      Last Updated: {new Date(caseItem.updatedAt).toLocaleDateString()}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="h6" style={{ color: themeColors.cardText }}>
+                        {caseItem.caseTitle}
+                      </Typography>
+                      <IconButton
+                        onClick={() => toggleExpand(caseItem._id)}
+                        sx={{ color: themeColors.cardText }}
+                      >
+                        {expandedCaseId === caseItem._id ? <ExpandLess /> : <ExpandMore />}
+                      </IconButton>
+                    </Box>
+                    
+                    <Collapse in={expandedCaseId === caseItem._id}>
+                      <Box sx={{ mt: 2, position: 'relative', paddingBottom: '40px' }}>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Case ID:</strong> {caseItem.caseId}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Detainee Name:</strong> {caseItem.detaineeName}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Grounds of Bail:</strong> {caseItem.groundsOfBail}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Case Summary:</strong> {caseItem.caseSummary}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Status:</strong> {caseItem.status}
+                        </Typography>
+                        
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<HelpOutline />}
+                          sx={{
+                            position: 'absolute',
+                            right: 16,
+                            bottom: 0,
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontSize: '0.875rem',
+                            padding: '6px 12px',
+                            backgroundColor: themeColors.buttonBg,
+                            '&:hover': {
+                              backgroundColor: themeColors.buttonHoverBg
+                            }
+                          }}
+                          onClick={() => handleAskAI(caseItem._id, caseItem.groundsOfBail, caseItem.caseSummary)}
+                          disabled={loading}
+                        >
+                          {loading ? "Processing..." : "Ask AI"}
+                        </Button>
+                      </Box>
+                    </Collapse>
                   </CardContent>
                 </Card>
               ))
@@ -134,23 +227,64 @@ const BailAppeals = ({ themeColors }) => {
                   sx={{ 
                     mb: 2, 
                     backgroundColor: themeColors.cardBg,
-                    cursor: "pointer",
                     transition: "transform 0.2s",
-                    "&:hover": {
-                      transform: "translateX(5px)"
-                    }
                   }}
                 >
                   <CardContent>
-                    <Typography variant="h6" style={{ color: themeColors.cardText }}>
-                      {caseItem.caseTitle}
-                    </Typography>
-                    <Typography variant="body2" style={{ color: themeColors.cardText }}>
-                      Case ID: {caseItem.caseId}
-                    </Typography>
-                    <Typography variant="caption" style={{ color: themeColors.cardText }}>
-                      Filed: {new Date(caseItem.filingDate).toLocaleDateString()}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="h6" style={{ color: themeColors.cardText }}>
+                        {caseItem.caseTitle}
+                      </Typography>
+                      <IconButton
+                        onClick={() => toggleExpand(caseItem._id)}
+                        sx={{ color: themeColors.cardText }}
+                      >
+                        {expandedCaseId === caseItem._id ? <ExpandLess /> : <ExpandMore />}
+                      </IconButton>
+                    </Box>
+                    
+                    <Collapse in={expandedCaseId === caseItem._id}>
+                      <Box sx={{ mt: 2, position: 'relative', paddingBottom: '40px' }}>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Case ID:</strong> {caseItem.caseId}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Detainee Name:</strong> {caseItem.detaineeName}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Grounds of Bail:</strong> {caseItem.groundsOfBail}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Case Summary:</strong> {caseItem.caseSummary}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: themeColors.cardText }}>
+                          <strong>Status:</strong> {caseItem.status}
+                        </Typography>
+                        
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<HelpOutline />}
+                          sx={{
+                            position: 'absolute',
+                            right: 16,
+                            bottom: 0,
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontSize: '0.875rem',
+                            padding: '6px 12px',
+                            backgroundColor: themeColors.buttonBg,
+                            '&:hover': {
+                              backgroundColor: themeColors.buttonHoverBg
+                            }
+                          }}
+                          onClick={() => handleAskAI(caseItem._id, caseItem.groundsOfBail, caseItem.caseSummary)}
+                          disabled={loading}
+                        >
+                          {loading ? "Processing..." : "Ask AI"}
+                        </Button>
+                      </Box>
+                    </Collapse>
                   </CardContent>
                 </Card>
               ))
@@ -158,6 +292,13 @@ const BailAppeals = ({ themeColors }) => {
           </Grid>
         )}
       </Grid>
+
+      <AIPopup_lawyer
+        open={aiPopupOpen}
+        onClose={handleCloseAiPopup}
+        aiResponse={aiResponse}
+        error={error}
+      />
     </div>
   );
 };
