@@ -5,13 +5,16 @@ const router = express.Router();
 
 // Refresh Token Route - Common for all user types
 router.get('/refresh', (req, res) => {
-    const token = req.cookies?.token;
+    // Extract the token from the Authorization header
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
 
     if (!token) {
         return res.status(401).json({ message: 'Not authenticated' });
     }
 
     try {
+        // Verify the token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // Issue a new token
@@ -26,14 +29,11 @@ router.get('/refresh', (req, res) => {
             { expiresIn: '1h' }
         );
 
-        // Set the new token in the response cookies
-        res.cookie('token', newToken, { 
-            httpOnly: true, 
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+        // Send the new token in the response (frontend will store it in local storage)
+        res.status(200).json({ 
+            user: decoded,
+            token: newToken // Send the new token to the frontend
         });
-
-        res.status(200).json({ user: decoded });
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token expired' });
