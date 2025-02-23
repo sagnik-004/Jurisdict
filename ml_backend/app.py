@@ -20,33 +20,30 @@ from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor
 # Initialize Flask app
 app = Flask(__name__)
 
-# Configure CORS to allow requests from your frontend domain
-CORS(
-    app,
-    resources={
-        r"/process_case*": {
-            "origins": ["https://jurisdict.pages.dev"],
-            "methods": ["POST", "OPTIONS"],
-            "allow_headers": ["Content-Type"]
-        }
+# Configure CORS properly
+CORS(app, resources={
+    r"/process_case*": {
+        "origins": ["https://jurisdict.pages.dev"],
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
     }
-)
+})
 
-# Handle OPTIONS requests for CORS preflight
-@app.route('/process_case_judge', methods=['OPTIONS'])
-@app.route('/process_case_lawyer', methods=['OPTIONS'])
-@app.route('/process_case_detainee', methods=['OPTIONS'])
-def handle_options():
-    response = jsonify()
-    response.headers.add("Access-Control-Allow-Origin", "https://jurisdict.pages.dev")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
-    return response, 200
+# Unified error handler for CORS
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'https://jurisdict.pages.dev')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+    return response
 
 # Judge-specific case processing API
-@app.route('/process_case_judge', methods=['POST'])
+@app.route('/process_case_judge', methods=['POST', 'OPTIONS'])
 def process_case_judge():
     """Judge-specific case processing API"""
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+        
     try:
         data = request.json
         processor = JudgeCaseProcessor()
@@ -70,12 +67,15 @@ def process_case_judge():
         return jsonify({"error": str(e)}), 500
 
 # Lawyer-specific case processing API
-@app.route('/process_case_lawyer', methods=['POST'])
+@app.route('/process_case_lawyer', methods=['POST', 'OPTIONS'])
 def process_case_lawyer():
     """Lawyer-specific case processing API"""
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+        
     try:
         data = request.json
-        processor = LawyerCaseProcessor()  # Create an instance of the Lawyer processor
+        processor = LawyerCaseProcessor()
         
         result = processor.process_case_for_lawyer(
             case_summary=data.get("caseSummary"),
@@ -96,12 +96,15 @@ def process_case_lawyer():
         return jsonify({"error": str(e)}), 500
 
 # Detainee-specific case processing API
-@app.route('/process_case_detainee', methods=['POST'])
+@app.route('/process_case_detainee', methods=['POST', 'OPTIONS'])
 def process_case_detainee():
     """Detainee-specific case processing API"""
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+        
     try:
         data = request.json
-        processor = DetaineeCaseProcessor()  # Create an instance of the Detainee processor
+        processor = DetaineeCaseProcessor()
 
         result = processor.process_case_for_detainee(
             case_summary=data.get("caseSummary"),
@@ -123,5 +126,5 @@ def process_case_detainee():
 
 # Run the Flask app
 if __name__ == '__main__':
-    port = int(os.getenv("PORT", 5000))  # Use Render's PORT or default to 5000
-    app.run(host='0.0.0.0', port=port, debug=False)  # Bind to all interfaces, disable debug
+    port = int(os.getenv("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
