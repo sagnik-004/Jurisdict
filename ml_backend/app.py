@@ -15,10 +15,17 @@ sys.path.append(project_root)
 # Import the processors
 from ml_backend.utils.JudgeCaseProcessor import JudgeCaseProcessor
 from ml_backend.utils.LawyerCaseProcessor import LawyerCaseProcessor
-from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor  # Import detainee processor
+from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor
 
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Production configuration
+app.config.update(
+    ENV='production' if os.getenv('FLASK_ENV') == 'production' else 'development',
+    SERVER_NAME='jurisdict-8nns.onrender.com'  # Set your Render domain here
+)
 
 @app.route('/process_case_judge', methods=['POST'])
 def process_case_judge():
@@ -97,4 +104,9 @@ def process_case_detainee():
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
-    app.run(debug=True, port=port)
+    # For production, use host='0.0.0.0' and disable debug mode
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    )
