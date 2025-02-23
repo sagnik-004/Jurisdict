@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children, userType }) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/auth/refresh", {
+        const response = await axios.get("https://jurisdict.onrender.com/auth/refresh", {
           withCredentials: true,
         });
 
