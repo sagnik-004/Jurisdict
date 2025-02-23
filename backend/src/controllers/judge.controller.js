@@ -3,12 +3,6 @@ import { Case } from "../models/case.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 
-const getCookieOptions = () => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-});
-
 const formatJudgeResponse = (judge) => ({
   id: judge._id,
   name: judge.name,
@@ -48,7 +42,6 @@ export const judgeSignup = async (req, res) => {
     const token = generateToken(judge._id, judge.email, judge.username);
     const userData = formatJudgeResponse(judge);
 
-    res.cookie("token", token, getCookieOptions());
     res.status(201).json({
       message: "Judge account created successfully!",
       user: userData,
@@ -64,10 +57,7 @@ export const judgeLogin = async (req, res) => {
   try {
     const { judgeIdOrUsername, password } = req.body;
 
-    // First try to find by username
     let judge = await Judge.findOne({ username: judgeIdOrUsername }).select("+password");
-
-    // If not found by username, try judgeId
     if (!judge) {
       judge = await Judge.findOne({ judgeId: judgeIdOrUsername }).select("+password");
     }
@@ -84,7 +74,6 @@ export const judgeLogin = async (req, res) => {
     const token = generateToken(judge._id, judge.email, judge.username);
     const userData = formatJudgeResponse(judge);
 
-    res.cookie("token", token, getCookieOptions());
     res.status(200).json({
       message: "Login successful!",
       user: userData,
@@ -157,22 +146,19 @@ export const bailDecision = async (req, res) => {
   try {
     const { caseId, status, comments } = req.body;
 
-    // Ensure that status is either "Accepted" or "Declined"
     if (!["Accepted", "Declined"].includes(status)) {
       return res.status(400).json({ message: "Invalid bail status" });
     }
 
-    // Convert comments from CSV string to array (if provided)
     const commentArray = comments ? comments.split(",").map(comment => comment.trim()) : [];
 
-    // Find the case and update its bailStatus and judgeComments
     const updatedCase = await Case.findByIdAndUpdate(
       caseId,
       {
         bailStatus: status,
         judgeComments: commentArray,
       },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!updatedCase) {
@@ -187,6 +173,5 @@ export const bailDecision = async (req, res) => {
 };
 
 export const judgeLogout = (req, res) => {
-  res.clearCookie("token", { path: "/" });
   res.status(200).json({ message: "Logout successful" });
 };
