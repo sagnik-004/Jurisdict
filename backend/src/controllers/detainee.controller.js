@@ -2,15 +2,39 @@ import { Detainee } from "../models/detainee.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 import { Case } from "../models/case.model.js";
+import jwt from 'jsonwebtoken';
 
-const getCookieOptions = () => ({
-  httpOnly: true,
-  secure: true, // Always true for production
-  sameSite: 'none', // Required for cross-site cookies
-  maxAge: 3600000, // 1 hour
-  path: '/'
-});
+// Middleware to validate token from Authorization header
+export const authMiddleware = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
 
+    if (!token) {
+        return res.status(401).json({ 
+            message: 'Access denied. No token provided.',
+            success: false
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // Attach the decoded user data to the request object
+        next(); // Proceed to the next middleware or route handler
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                message: 'Token expired.',
+                success: false
+            });
+        }
+        return res.status(403).json({ 
+            message: 'Invalid token.',
+            success: false
+        });
+    }
+};
+
+// Detainee Signup
 export const detaineeSignup = async (req, res) => {
     try {
         const existingUser = await Detainee.findOne({
@@ -52,15 +76,15 @@ export const detaineeSignup = async (req, res) => {
         await detainee.save();
 
         const token = generateToken(detainee._id, detainee.email, detainee.username);
-        res.cookie("token", token, getCookieOptions());
 
         res.status(201).json({
             message: "Detainee account created successfully!",
-            user: { // Changed from 'data' to 'user'
+            user: {
                 id: detainee._id,
                 name: detainee.name,
                 username: detainee.username
             },
+            token: token, // Send token in the response
             success: true
         });
     } catch (error) {
@@ -72,6 +96,7 @@ export const detaineeSignup = async (req, res) => {
     }
 };
 
+// Detainee Login
 export const detaineeLogin = async (req, res) => {
     try {
         const { emailOrUsername, password } = req.body;
@@ -105,7 +130,6 @@ export const detaineeLogin = async (req, res) => {
         }
 
         const token = generateToken(detainee._id, detainee.email, detainee.username);
-        res.cookie("token", token, getCookieOptions());
 
         res.status(200).json({ 
             message: 'Login successful!', 
@@ -114,7 +138,7 @@ export const detaineeLogin = async (req, res) => {
                 name: detainee.name,
                 username: detainee.username
             },
-            token: token,  // Added token to response
+            token: token, // Send token in the response
             success: true
         });
     } catch (error) {
@@ -126,18 +150,17 @@ export const detaineeLogin = async (req, res) => {
     }
 };
 
+// Detainee Logout
 export const detaineeLogout = (req, res) => {
-    res.clearCookie("token", getCookieOptions());
     res.status(200).json({ 
         message: "Logout successful",
         success: true
     });
 };
 
-
+// Get Ongoing Cases
 export const getOngoingCases = async (req, res) => {
     try {
-        // Get username from URL parameter
         const { username } = req.params;
         
         const cases = await Case.find({ 
@@ -158,6 +181,7 @@ export const getOngoingCases = async (req, res) => {
     }
 };
 
+// Get Bail Appeals
 export const getBailAppeals = async (req, res) => {
     try {
         const { username } = req.params;
