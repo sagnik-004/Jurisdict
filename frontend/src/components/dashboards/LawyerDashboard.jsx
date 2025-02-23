@@ -18,6 +18,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Tooltip,
 } from "@mui/material";
 import {
   AddCircleOutline,
@@ -30,6 +31,8 @@ import {
   Brightness7,
   Logout,
   ExpandMore,
+  Menu,
+  ChevronLeft,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../lib/axios.js";
@@ -41,7 +44,8 @@ const LawyerDashboard = () => {
   const [mode, setMode] = useState("light");
   const [ongoingCases, setOngoingCases] = useState([]);
   const [expandedCase, setExpandedCase] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true); // State for sidebar visibility
+  const user = JSON.parse(localStorage.getItem("user")); // Fetch user object from local storage
 
   const navigate = useNavigate();
 
@@ -77,6 +81,10 @@ const LawyerDashboard = () => {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarVisible((prev) => !prev); // Toggle sidebar visibility
   };
 
   useEffect(() => {
@@ -121,20 +129,31 @@ const LawyerDashboard = () => {
       backgroundColor: theme.palette.background.default,
     },
     sidebar: {
-      width: "280px",
+      width: isSidebarVisible ? "280px" : "0", // Hide sidebar when collapsed
       backgroundColor: mode === "light" ? "#1a237e" : "#0d47a1",
       color: "#fff",
-      padding: "24px",
+      padding: isSidebarVisible ? "24px" : "0", // Remove padding when collapsed
       display: "flex",
       flexDirection: "column",
       justifyContent: "space-between",
       boxShadow: "3px 0 10px rgba(0, 0, 0, 0.1)",
+      transition: "width 0.3s ease, padding 0.3s ease", // Smooth transition for width and padding
+      height: "100vh", // Full height
+      position: "fixed", // Fixed position
+      left: 0,
+      top: 0,
+      overflow: "hidden", // Hide overflow when collapsed
+      zIndex: 1200, // Ensure sidebar is above other content
     },
     mainContent: {
       flex: 1,
       padding: "32px",
       backgroundColor: theme.palette.background.paper,
       overflowY: "auto",
+      marginLeft: isSidebarVisible ? "280px" : "0", // Adjust margin based on sidebar visibility
+      transition: "margin-left 0.3s ease", // Smooth transition for main content
+      paddingLeft: isSidebarVisible ? "32px" : "64px", // Add extra padding for collapse button
+      paddingTop: "64px", // Add blank space at the top
     },
     inputField: {
       marginBottom: "24px",
@@ -196,6 +215,20 @@ const LawyerDashboard = () => {
     faqItem: {
       marginBottom: "8px",
     },
+    collapseButton: {
+      position: "fixed",
+      top: 16,
+      left: isSidebarVisible ? "280px" : "16px", // Adjust position based on sidebar visibility
+      zIndex: 1300, // Ensure button is above other content
+      transition: "left 0.3s ease", // Smooth transition for button position
+      backgroundColor: mode === "light" ? "#1a237e" : "#0d47a1", // Highlight button background
+      color: "#fff", // Highlight button text color
+      borderRadius: "50%", // Circular button
+      padding: "8px", // Padding for better appearance
+      "&:hover": {
+        backgroundColor: mode === "light" ? "#3949ab" : "#1565c0", // Hover effect
+      },
+    },
   };
 
   const menuItems = [
@@ -253,82 +286,81 @@ const LawyerDashboard = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={styles.dashboard}>
-        <Box sx={styles.sidebar}>
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-              <Balance sx={{ fontSize: 32, color: "#ff5722" }} />
-              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                Themisync
-              </Typography>
-            </Box>
+        {isSidebarVisible && ( // Render sidebar only when visible
+          <Box sx={styles.sidebar}>
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+                <Balance sx={{ fontSize: 32, color: "#ff5722" }} />
+                <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                  JurisDict {/* Changed from "Themisync" to "JurisDict" */}
+                </Typography>
+              </Box>
 
-            <List>
-              {menuItems.map((item) => (
-                <ListItem
-                  key={item.text}
-                  component="div"
-                  sx={{
-                    borderRadius: "8px",
-                    mb: 1,
-                    padding: "12px 16px",
-                    backgroundColor: selectedItem === item.text 
-                      ? "#fff" 
-                      : (mode === "light" ? "#1a237e" : "#0d47a1"),
-                    "&:hover": {
+              <List>
+                {menuItems.map((item) => (
+                  <ListItem
+                    key={item.text}
+                    component="div"
+                    sx={{
+                      borderRadius: "8px",
+                      mb: 1,
+                      padding: "12px 16px",
                       backgroundColor: selectedItem === item.text 
                         ? "#fff" 
-                        : (mode === "light" ? "#3949ab" : "#1565c0")
-                    },
-                    cursor: "pointer",
-                    transition: "background-color 0.3s ease"
-                  }}
-                  onClick={() => setSelectedItem(item.text)}
-                >
-                  <ListItemIcon sx={{ 
-                    color: selectedItem === item.text 
-                      ? "#1a237e" 
-                      : "#fff" 
-                  }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text}
-                    sx={{ 
+                        : (mode === "light" ? "#1a237e" : "#0d47a1"),
+                      "&:hover": {
+                        backgroundColor: selectedItem === item.text 
+                          ? "#fff" 
+                          : (mode === "light" ? "#3949ab" : "#1565c0")
+                      },
+                      cursor: "pointer",
+                      transition: "background-color 0.3s ease"
+                    }}
+                    onClick={() => setSelectedItem(item.text)}
+                  >
+                    <ListItemIcon sx={{ 
                       color: selectedItem === item.text 
                         ? "#1a237e" 
                         : "#fff" 
-                    }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-
-          <Box sx={styles.profileSection}>
-            <Avatar sx={styles.avatar}>{getInitials(user.name)}</Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                {user.name}
-              </Typography>
-              <Typography variant="body2" sx={{ color: "#e0e0e0" }}>
-                @{user.username}
-              </Typography>
+                    }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary={item.text}
+                      sx={{ 
+                        color: selectedItem === item.text 
+                          ? "#1a237e" 
+                          : "#fff" 
+                      }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </Box>
-            <IconButton 
-              onClick={handleLogout} 
-              color="inherit"
-              sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
-            >
-              <Logout />
-            </IconButton>
+
+            <Box sx={styles.profileSection}>
+              <Avatar sx={styles.avatar}>{getInitials(user.name)}</Avatar>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                  {user.name}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#e0e0e0" }}>
+                  @{user.username} {/* Display username from user object */}
+                </Typography>
+              </Box>
+              <IconButton 
+                onClick={handleLogout} 
+                color="inherit"
+                sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
+              >
+                <Logout />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
+        )}
 
         <Box sx={styles.mainContent}>
-          <Typography variant="h4" gutterBottom>
-            {selectedItem}
-          </Typography>
-
+          {/* Removed the heading for the selected item */}
           {selectedItem === "Add Case" && (
             <Box>
               <TextField
@@ -487,6 +519,14 @@ const LawyerDashboard = () => {
             </Box>
           )}
         </Box>
+
+        <IconButton
+          sx={styles.collapseButton}
+          onClick={toggleSidebar}
+          color="inherit"
+        >
+          {isSidebarVisible ? <ChevronLeft /> : <Menu />}
+        </IconButton>
 
         <IconButton
           sx={{ position: "fixed", top: 16, right: 16 }}

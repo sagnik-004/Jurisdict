@@ -9,8 +9,18 @@ const ProtectedRoute = ({ children, userType }) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/auth/refresh", {
-          withCredentials: true,
+        // Retrieve the token from local storage
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        // Send the token in the Authorization header
+        const response = await axios.get("https://jurisdict.onrender.com/auth/refresh", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!response.data?.user) {
@@ -21,6 +31,8 @@ const ProtectedRoute = ({ children, userType }) => {
       } catch (error) {
         console.error("Authentication failed:", error);
         setUser(null);
+        // Clear the token from local storage if it's invalid
+        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }

@@ -6,11 +6,11 @@ import {
   Scale,
   HelpCircle,
   Gavel,
-  Menu,
-  X,
   LogOut,
   ChevronDown,
   ChevronUp,
+  Menu,
+  ChevronLeft,
 } from "lucide-react";
 import {
   useMediaQuery,
@@ -23,6 +23,8 @@ import {
   Collapse,
 } from "@mui/material";
 import { Balance, Brightness4, Brightness7 } from "@mui/icons-material";
+import OngoingCases from "../detaineedashboardcomponents/OngoingCases.jsx";
+import BailAppeals from "../detaineedashboardcomponents/BailAppeals.jsx";
 
 const DetaineeDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("Add Case");
@@ -32,9 +34,8 @@ const DetaineeDashboard = () => {
   const [hoveredIndex, setHoveredIndex] = useState(-1);
   const [user, setUser] = useState(null);
   const [caseSummary, setCaseSummary] = useState("");
-  const [cases, setCases] = useState([]); // Stores all added cases
-  const [bailCases, setBailCases] = useState([]); // Stores cases applied for bail
-  const [faqOpenIndex, setFaqOpenIndex] = useState(null); // Tracks open FAQ dropdown
+  const [cases, setCases] = useState([]);
+  const [faqOpenIndex, setFaqOpenIndex] = useState(null);
 
   useEffect(() => {
     if (isMobile) setIsCollapsed(true);
@@ -43,18 +44,15 @@ const DetaineeDashboard = () => {
   }, [isMobile]);
 
   const themeColors = {
-    background: isDarkTheme ? "#121212" : "#f0f4f8", // Darker background for better contrast
-    text: isDarkTheme ? "#e0e0e0" : "#2c3e50", // Brighter text for dark mode
-    sidebarBg: isDarkTheme ? "#1a1a2e" : "#ffffff", // Darker sidebar for dark mode
+    background: isDarkTheme ? "#121212" : "#f0f4f8",
+    text: isDarkTheme ? "#e0e0e0" : "#2c3e50",
+    sidebarBg: isDarkTheme ? "#1a1a2e" : "#ffffff",
     buttonBg: isDarkTheme ? "#0f3460" : "#4a90e2",
     hoverBg: isDarkTheme ? "#0f346080" : "#4a90e280",
     inputBg: isDarkTheme ? "#1e1e1e" : "#ffffff",
     inputText: isDarkTheme ? "#e0e0e0" : "#2c3e50",
-    cardBg: isDarkTheme ? "#1e1e1e" : "#ffffff", // Card background for FAQs
-    cardText: isDarkTheme ? "#e0e0e0" : "#2c3e50", // Card text color
-    gradient: isDarkTheme
-      ? "linear-gradient(135deg, #1a1a2e 0%, #121212 100%)"
-      : "linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%)",
+    cardBg: isDarkTheme ? "#1e1e1e" : "#ffffff",
+    cardText: isDarkTheme ? "#e0e0e0" : "#2c3e50",
   };
 
   const menuItems = [
@@ -91,29 +89,20 @@ const DetaineeDashboard = () => {
       return;
     }
     const newCase = {
-      caseId: "CASE-" + Math.floor(Math.random() * 10000), // Random case ID
+      caseId: "CASE-" + Math.floor(Math.random() * 10000),
       caseTitle: "Sample Case Title",
       bnsSection: "Sample BNS Section",
       courtName: "Sample Court Name",
-      judgeId: "JUDGE-" + Math.floor(Math.random() * 1000), // Random judge ID
+      judgeId: "JUDGE-" + Math.floor(Math.random() * 1000),
       filingDate: new Date().toISOString().split("T")[0],
       hearingDate: new Date().toISOString().split("T")[0],
       policeStation: "Sample Police Station",
       caseSummary,
-      detaineeId: "DETAINEE-" + Math.floor(Math.random() * 1000), // Random detainee ID
+      detaineeId: "DETAINEE-" + Math.floor(Math.random() * 1000),
       bailFilingDate: new Date().toISOString().split("T")[0],
       groundsForBail: "Sample Grounds for Bail",
     };
     setCases([...cases, newCase]);
-    console.log("Case submitted successfully!", newCase);
-  };
-
-  const handleApplyForBail = (caseId) => {
-    const caseToApply = cases.find((c) => c.caseId === caseId);
-    if (caseToApply) {
-      setBailCases([...bailCases, caseToApply]);
-      alert(`Applied for bail for case: ${caseId}`);
-    }
   };
 
   const faqs = [
@@ -123,8 +112,7 @@ const DetaineeDashboard = () => {
     },
     {
       question: "How do I track bail status?",
-      answer:
-        "Go to the 'Track Bail Status' section to view the status of your bail applications.",
+      answer: "Go to the 'Track Bail Status' section to view the status of your bail applications.",
     },
     {
       question: "What is Bharatiya Nyaya Sanhita?",
@@ -132,17 +120,21 @@ const DetaineeDashboard = () => {
     },
     {
       question: "How do I view ongoing cases?",
-      answer:
-        "Go to the 'Ongoing Cases' section to view all your active cases.",
+      answer: "Go to the 'Ongoing Cases' section to view all your active cases.",
     },
   ];
 
   return (
     <div
       style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         display: "flex",
-        minHeight: "100vh",
-        background: themeColors.gradient,
+        overflow: "hidden",
+        backgroundColor: themeColors.background,
         fontFamily: "'Inter', sans-serif",
         color: themeColors.text,
       }}
@@ -158,10 +150,10 @@ const DetaineeDashboard = () => {
           justifyContent: "space-between",
           boxShadow: "4px 0 15px rgba(0,0,0,0.1)",
           transition: "all 0.3s ease",
-          position: isMobile ? "fixed" : "relative",
+          position: "relative",
           height: "100vh",
           zIndex: 999,
-          overflow: "hidden", // Prevent scrolling in the sidebar
+          overflow: "hidden",
         }}
       >
         {/* Sidebar Header */}
@@ -186,7 +178,7 @@ const DetaineeDashboard = () => {
                   color: themeColors.text,
                 }}
               >
-                Themisync
+                JurisDict
               </h1>
             </div>
           </div>
@@ -287,35 +279,33 @@ const DetaineeDashboard = () => {
         style={{
           flex: 1,
           padding: "40px",
-          marginLeft: isCollapsed ? 0 : isMobile ? 0 : "250px",
-          transition: "margin 0.3s ease",
-          overflowY: "auto", // Only the right side is scrollable
+          paddingLeft: isCollapsed ? "40px" : "80px", // Added padding to prevent overlap
+          marginLeft: isCollapsed ? 0 : isMobile ? 0 : "20px",
+          transition: "margin 0.3s ease, padding 0.3s ease",
+          overflowY: "auto",
           height: "100vh",
+          backgroundColor: themeColors.background,
+          boxSizing: "border-box",
         }}
       >
         {/* Collapse Toggle Button */}
-        <button
+        <IconButton
           onClick={toggleSidebar}
           style={{
             position: "fixed",
-            left: isCollapsed || isMobile ? "20px" : "270px",
             top: "20px",
+            left: isCollapsed ? "20px" : "270px", // Adjust position based on sidebar state
             zIndex: 1000,
-            padding: "8px",
-            borderRadius: "50%",
-            border: "none",
-            cursor: "pointer",
             backgroundColor: themeColors.buttonBg,
             color: "#ffffff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            padding: "8px",
+            borderRadius: "50%",
             boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
             transition: "all 0.3s ease",
           }}
         >
-          {isCollapsed ? <Menu size={24} /> : <X size={24} />}
-        </button>
+          {isCollapsed ? <Menu size={24} /> : <ChevronLeft size={24} />}
+        </IconButton>
 
         {/* Theme Toggle Button */}
         <IconButton
@@ -335,6 +325,7 @@ const DetaineeDashboard = () => {
           )}
         </IconButton>
 
+        {/* Main Content */}
         <h2
           style={{ fontSize: "2rem", fontWeight: "700", marginBottom: "30px" }}
         >
@@ -523,92 +514,15 @@ const DetaineeDashboard = () => {
 
         {/* Ongoing Cases */}
         {selectedMenu === "Ongoing Cases" && (
-          <div
-            style={{
-              backgroundColor: themeColors.sidebarBg,
-              borderRadius: "12px",
-              padding: "30px",
-              boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-            }}
-          >
-            {cases.length === 0 ? (
-              <Typography variant="body1" style={{ color: themeColors.text }}>
-                No ongoing cases found.
-              </Typography>
-            ) : (
-              cases.map((caseItem, index) => (
-                <Card
-                  key={index}
-                  sx={{
-                    mb: 3,
-                    backgroundColor: themeColors.cardBg,
-                    color: themeColors.cardText,
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6">{caseItem.caseTitle}</Typography>
-                    <Typography variant="body2">
-                      Case ID: {caseItem.caseId}
-                    </Typography>
-                    <Typography variant="body2">
-                      Court: {caseItem.courtName}
-                    </Typography>
-                    <Typography variant="body2">
-                      Filing Date: {caseItem.filingDate}
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleApplyForBail(caseItem.caseId)}
-                      sx={{ mt: 2 }}
-                    >
-                      Apply for Bail
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+          <OngoingCases themeColors={themeColors} />
         )}
 
         {/* Track Bail Status */}
         {selectedMenu === "Track Bail Status" && (
-          <div
-            style={{
-              backgroundColor: themeColors.sidebarBg,
-              borderRadius: "12px",
-              padding: "30px",
-              boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-            }}
-          >
-            {bailCases.length === 0 ? (
-              <Typography variant="body1" style={{ color: themeColors.text }}>
-                No bail applications found.
-              </Typography>
-            ) : (
-              bailCases.map((caseItem, index) => (
-                <Card
-                  key={index}
-                  sx={{
-                    mb: 3,
-                    backgroundColor: themeColors.cardBg,
-                    color: themeColors.cardText,
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6">{caseItem.caseTitle}</Typography>
-                    <Typography variant="body2">
-                      Case ID: {caseItem.caseId}
-                    </Typography>
-                    <Typography variant="body2">Status: Pending</Typography>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+          <BailAppeals themeColors={themeColors} />
         )}
 
-        {/* FAQs */}
+        {/* FAQ */}
         {selectedMenu === "FAQ" && (
           <div
             style={{
