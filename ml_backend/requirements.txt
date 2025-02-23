@@ -12,3 +12,4 @@ h5py==3.12.1
 grpcio==1.66.1
 Werkzeug==3.0.4
 requests==2.32.3
+python-dotenv==1.0.1
