@@ -109,4 +109,4 @@ def process_case_detainee():
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))  # Use Render's PORT or default to 5000
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False)  # Bind to all interfaces, disable debug mode
