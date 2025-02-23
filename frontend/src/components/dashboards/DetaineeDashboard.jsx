@@ -6,11 +6,11 @@ import {
   Scale,
   HelpCircle,
   Gavel,
-  Menu,
-  X,
   LogOut,
   ChevronDown,
   ChevronUp,
+  Menu,
+  ChevronLeft,
 } from "lucide-react";
 import {
   useMediaQuery,
@@ -279,8 +279,9 @@ const DetaineeDashboard = () => {
         style={{
           flex: 1,
           padding: "40px",
-          marginLeft: isCollapsed ? 0 : isMobile ? 0 : "250px",
-          transition: "margin 0.3s ease",
+          paddingLeft: isCollapsed ? "40px" : "80px", // Added padding to prevent overlap
+          marginLeft: isCollapsed ? 0 : isMobile ? 0 : "20px",
+          transition: "margin 0.3s ease, padding 0.3s ease",
           overflowY: "auto",
           height: "100vh",
           backgroundColor: themeColors.background,
@@ -288,28 +289,23 @@ const DetaineeDashboard = () => {
         }}
       >
         {/* Collapse Toggle Button */}
-        <button
+        <IconButton
           onClick={toggleSidebar}
           style={{
             position: "fixed",
-            left: isCollapsed || isMobile ? "20px" : "270px",
             top: "20px",
+            left: isCollapsed ? "20px" : "270px", // Adjust position based on sidebar state
             zIndex: 1000,
-            padding: "8px",
-            borderRadius: "50%",
-            border: "none",
-            cursor: "pointer",
             backgroundColor: themeColors.buttonBg,
             color: "#ffffff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            padding: "8px",
+            borderRadius: "50%",
             boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
             transition: "all 0.3s ease",
           }}
         >
-          {isCollapsed ? <Menu size={24} /> : <X size={24} />}
-        </button>
+          {isCollapsed ? <Menu size={24} /> : <ChevronLeft size={24} />}
+        </IconButton>
 
         {/* Theme Toggle Button */}
         <IconButton
@@ -329,6 +325,7 @@ const DetaineeDashboard = () => {
           )}
         </IconButton>
 
+        {/* Main Content */}
         <h2
           style={{ fontSize: "2rem", fontWeight: "700", marginBottom: "30px" }}
         >
