@@ -37,7 +37,11 @@ CORS(
 @app.route('/process_case_lawyer', methods=['OPTIONS'])
 @app.route('/process_case_detainee', methods=['OPTIONS'])
 def handle_options():
-    return jsonify(), 200
+    response = jsonify()
+    response.headers.add("Access-Control-Allow-Origin", "https://jurisdict.pages.dev")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+    return response, 200
 
 # Judge-specific case processing API
 @app.route('/process_case_judge', methods=['POST'])
