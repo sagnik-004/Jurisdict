@@ -19,12 +19,17 @@ from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
 
-# Production configuration
-app.config.update(
-    ENV='production' if os.getenv('FLASK_ENV') == 'production' else 'development',
-    SERVER_NAME='jurisdict-8nns.onrender.com'  # Set your Render domain here
+# Configure CORS to allow requests from your frontend domain
+CORS(
+    app,
+    resources={
+        r"/process_case*": {
+            "origins": ["https://jurisdict.pages.dev"],
+            "methods": ["POST", "OPTIONS"],
+            "allow_headers": ["Content-Type"]
+        }
+    }
 )
 
 @app.route('/process_case_judge', methods=['POST'])
@@ -104,9 +109,4 @@ def process_case_detainee():
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
-    # For production, use host='0.0.0.0' and disable debug mode
-    app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-    )
+    app.run(debug=True, port=port)
