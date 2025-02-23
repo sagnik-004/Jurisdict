@@ -9,7 +9,7 @@ load_dotenv()
 
 # Add project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)  # Go one level up to the root directory
+project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
 # Import the processors
@@ -20,29 +20,30 @@ from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor
 # Initialize Flask app
 app = Flask(__name__)
 
-# Configure CORS properly
+# Configure CORS properly - SINGLE CONFIGURATION POINT
 CORS(app, resources={
     r"/process_case*": {
-        "origins": ["https://jurisdict.pages.dev"],
+        "origins": "https://jurisdict.pages.dev",
         "methods": ["POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
 
-# Unified error handler for CORS
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'https://jurisdict.pages.dev')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-    return response
+# Handle OPTIONS for undefined routes
+@app.route('/<undefined_path>', methods=['OPTIONS'])
+def handle_undefined_options(undefined_path):
+    response = jsonify()
+    response.headers.add("Access-Control-Allow-Origin", "https://jurisdict.pages.dev")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+    return response, 200
 
 # Judge-specific case processing API
 @app.route('/process_case_judge', methods=['POST', 'OPTIONS'])
 def process_case_judge():
-    """Judge-specific case processing API"""
     if request.method == 'OPTIONS':
-        return jsonify({}), 200
+        return jsonify(), 200
         
     try:
         data = request.json
@@ -54,14 +55,12 @@ def process_case_judge():
             past_criminal_records=data.get("pastOffenses", [])
         )
 
-        response = {
+        return jsonify({
             "caseId": data.get("caseId"),
             "decision": result.get("decision", "Error"),
             "aiReport": result.get("report", "AI report unavailable."),
             "topCases": result.get("topCases", [])
-        }
-        
-        return jsonify(response), 200
+        }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -69,9 +68,8 @@ def process_case_judge():
 # Lawyer-specific case processing API
 @app.route('/process_case_lawyer', methods=['POST', 'OPTIONS'])
 def process_case_lawyer():
-    """Lawyer-specific case processing API"""
     if request.method == 'OPTIONS':
-        return jsonify({}), 200
+        return jsonify(), 200
         
     try:
         data = request.json
@@ -82,15 +80,13 @@ def process_case_lawyer():
             grounds_of_bail=data.get("groundsOfBail", [])
         )
 
-        response = {
+        return jsonify({
             "caseId": data.get("caseId"),
             "decision": result.get("decision", "Error"),
             "detailedAnalysis": result.get("detailedAnalysis", "No analysis available"),
             "keyPoints": result.get("keyPoints", {}),
             "additionalInfo": result.get("additionalInfo", {})
-        }
-        
-        return jsonify(response), 200
+        }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -98,9 +94,8 @@ def process_case_lawyer():
 # Detainee-specific case processing API
 @app.route('/process_case_detainee', methods=['POST', 'OPTIONS'])
 def process_case_detainee():
-    """Detainee-specific case processing API"""
     if request.method == 'OPTIONS':
-        return jsonify({}), 200
+        return jsonify(), 200
         
     try:
         data = request.json
@@ -111,18 +106,21 @@ def process_case_detainee():
             grounds_of_bail=data.get("groundsOfBail", [])
         )
 
-        response = {
+        return jsonify({
             "caseId": data.get("caseId"),
             "decision": result.get("decision", "Pending"),
             "detailedAnalysis": result.get("detailedAnalysis", "No analysis available"),
             "keyPoints": result.get("keyPoints", {}),
             "additionalInfo": result.get("additionalInfo", {})
-        }
-        
-        return jsonify(response), 200
+        }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
 
 # Run the Flask app
 if __name__ == '__main__':
