@@ -137,7 +137,7 @@ const JudgeDashboard = () => {
     setAIRecommendation("Processing AI recommendation...");
     setAIPopupOpen(true);
 
-    fetch("https://jurisdict-8nns.onrender.com/process_case", {
+    fetch("https://jurisdict-8nns.onrender.com/process_case_judge/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
