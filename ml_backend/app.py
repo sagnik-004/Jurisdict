@@ -32,6 +32,14 @@ CORS(
     }
 )
 
+# Handle OPTIONS requests for CORS preflight
+@app.route('/process_case_judge', methods=['OPTIONS'])
+@app.route('/process_case_lawyer', methods=['OPTIONS'])
+@app.route('/process_case_detainee', methods=['OPTIONS'])
+def handle_options():
+    return jsonify(), 200
+
+# Judge-specific case processing API
 @app.route('/process_case_judge', methods=['POST'])
 def process_case_judge():
     """Judge-specific case processing API"""
@@ -57,6 +65,7 @@ def process_case_judge():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Lawyer-specific case processing API
 @app.route('/process_case_lawyer', methods=['POST'])
 def process_case_lawyer():
     """Lawyer-specific case processing API"""
@@ -82,6 +91,7 @@ def process_case_lawyer():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Detainee-specific case processing API
 @app.route('/process_case_detainee', methods=['POST'])
 def process_case_detainee():
     """Detainee-specific case processing API"""
@@ -107,6 +117,7 @@ def process_case_detainee():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Run the Flask app
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))  # Use Render's PORT or default to 5000
-    app.run(host='0.0.0.0', port=port, debug=False)  # Bind to all interfaces, disable debug mode
+    app.run(host='0.0.0.0', port=port, debug=False)  # Bind to all interfaces, disable debug
