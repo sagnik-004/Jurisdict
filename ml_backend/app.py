@@ -4,37 +4,37 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-# Load environment variables first
 load_dotenv()
 
-# Add project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-# Import the processors
 from ml_backend.utils.JudgeCaseProcessor import JudgeCaseProcessor
 from ml_backend.utils.LawyerCaseProcessor import LawyerCaseProcessor
 from ml_backend.utils.DetaineeCaseProcessor import DetaineeCaseProcessor
 
-# Initialize Flask app
 app = Flask(__name__)
 
-# Configure CORS properly - SINGLE CONFIGURATION POINT
 CORS(app, resources={
     r"/process_case*": {
-        "origins": "https://jurisdict.pages.dev",
+        "origins": ["https://jurisdict.pages.dev", "http://localhost:5173"],
         "methods": ["POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
     }
 })
 
-# Handle OPTIONS for undefined routes
+# Optional: Handle OPTIONS for undefined routes. This dynamically echoes back the request origin.
 @app.route('/<undefined_path>', methods=['OPTIONS'])
 def handle_undefined_options(undefined_path):
     response = jsonify()
-    response.headers.add("Access-Control-Allow-Origin", "https://jurisdict.pages.dev")
+    origin = request.headers.get('Origin')
+    allowed_origins = ["https://jurisdict.pages.dev", "http://localhost:5173"]
+    if origin in allowed_origins:
+        response.headers.add("Access-Control-Allow-Origin", origin)
+    else:
+        response.headers.add("Access-Control-Allow-Origin", "https://jurisdict.pages.dev")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
     response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
     return response, 200
@@ -65,7 +65,6 @@ def process_case_judge():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Lawyer-specific case processing API
 @app.route('/process_case_lawyer', methods=['POST', 'OPTIONS'])
 def process_case_lawyer():
     if request.method == 'OPTIONS':
