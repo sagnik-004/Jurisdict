@@ -49,7 +49,7 @@ const LawyerTrackBail = () => {
     setAiPopupOpen(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/process_case_lawyer", {
+      const response = await fetch("https://jurisdict-8nns.onrender.com/process_case_lawyer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
