@@ -51,6 +51,7 @@ const LawyerTrackBail = () => {
     try {
       const response = await fetch("https://jurisdict-8nns.onrender.com/process_case_lawyer", {
         method: "POST",
+        mode: "cors", // explicitly set mode to CORS
         headers: {
           "Content-Type": "application/json",
         },
