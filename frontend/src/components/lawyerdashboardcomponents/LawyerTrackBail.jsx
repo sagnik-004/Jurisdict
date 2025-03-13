@@ -43,37 +43,40 @@ const LawyerTrackBail = () => {
   }, [user.lawyerId]);
 
   const handleAskAI = async (caseId, groundsOfBail, caseSummary) => {
-    setLoading(true);
-    setError(null);
-    setAiResponse(null);
-    setAiPopupOpen(true);
+  setLoading(true);
+  setError(null);
+  setAiResponse(null);
+  setAiPopupOpen(true);
 
-    try {
-      const response = await fetch("https://jurisdict-8nns.onrender.com/process_case_lawyer", {
-        method: "POST",
-        mode: "cors", // explicitly set mode to CORS
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          groundsOfBail,
-          caseSummary,
-        }),
-      });
+  console.log("API Endpoint:", "https://jurisdict-8nns.onrender.com/process_case_lawyer");
+  console.log("Request Body:", { caseId, groundsOfBail, caseSummary });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch AI response");
-      }
+  try {
+    const response = await fetch("https://jurisdict-8nns.onrender.com/process_case_lawyer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        caseId,  // <-- Ensure caseId is included
+        groundsOfBail,
+        caseSummary,
+      }),
+    });
 
-      const data = await response.json();
-      setAiResponse(data);
-    } catch (error) {
-      console.error("Error fetching AI response:", error);
-      setError("Failed to fetch AI response. Please try again.");
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error("Failed to fetch AI response");
     }
-  };
+
+    const data = await response.json();
+    setAiResponse(data);
+  } catch (error) {
+    console.error("Error fetching AI response:", error);
+    setError("Failed to fetch AI response. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const toggleExpand = (caseId) => {
     setExpandedCaseId((prev) => (prev === caseId ? null : caseId));
