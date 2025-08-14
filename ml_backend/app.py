@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 CORS(app, resources={
     r"/process_case*": {
-        "origins": ["https://jurisdict.pages.dev", "http://localhost:5173"],
+        "origins": ["https://jurisdict-puri.onrender.com", "http://localhost:5173"],
         "methods": ["POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
@@ -30,11 +30,11 @@ CORS(app, resources={
 def handle_undefined_options(undefined_path):
     response = jsonify()
     origin = request.headers.get('Origin')
-    allowed_origins = ["https://jurisdict.pages.dev", "http://localhost:5173"]
+    allowed_origins = ["https://jurisdict-puri.onrender.com", "http://localhost:5173"]
     if origin in allowed_origins:
         response.headers.add("Access-Control-Allow-Origin", origin)
     else:
-        response.headers.add("Access-Control-Allow-Origin", "https://jurisdict.pages.dev")
+        response.headers.add("Access-Control-Allow-Origin", "https://jurisdict-puri.onrender.com")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
     response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
     return response, 200

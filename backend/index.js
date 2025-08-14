@@ -13,7 +13,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://jurisdict.pages.dev"],  // Updated to array of allowed origins
+    origin: ["http://localhost:5173", "https://jurisdict-puri.onrender.com"], 
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'], 

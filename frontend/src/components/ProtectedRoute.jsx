@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children, userType }) => {
         }
 
         // Send the token in the Authorization header
-        const response = await axios.get("https://jurisdict.onrender.com/auth/refresh", {
+        const response = await axios.get("https://jurisdict-backend.onrender.com/auth/refresh", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
