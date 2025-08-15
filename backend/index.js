@@ -13,24 +13,23 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://jurisdict-puri.onrender.com"], 
+    origin: ["http://localhost:5173", "https://jurisdict-482c.onrender.com"], 
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'], 
   })
 );
 
 app.use(express.json());
 app.use(cookieParser());
+
 dotenv.config();
 
 const PORT = process.env.PORT;
 
-app.use("/lawyer", lawyerRoutes);
-app.use("/judge", judgeRoutes);
-app.use("/detainee", detaineeRoutes);
-app.use("/case", caseRoutes);
 app.use("/auth", authRoutes);  
+app.use("/case", caseRoutes);
+app.use("/judge", judgeRoutes);
+app.use("/lawyer", lawyerRoutes);
+app.use("/detainee", detaineeRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
