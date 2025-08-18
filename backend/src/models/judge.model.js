@@ -35,10 +35,9 @@ const judgeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-  },
-  {
-    timestamps: true,
-  }
-);
+    caseIds: {
+      type: [],
+    }
+  }, { timestamps: true });
 
 export const Judge = mongoose.model("Judge", judgeSchema);

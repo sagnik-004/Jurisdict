@@ -1,15 +1,7 @@
 import { Judge } from "../models/judge.model.js";
 import { Case } from "../models/case.model.js";
 import bcrypt from "bcryptjs";
-import generateToken from "../utils/generateToken.js";
-
-const formatJudgeResponse = (judge) => ({
-  id: judge._id,
-  name: judge.name,
-  username: judge.username,
-  judgeId: judge.judgeId,
-  createdAt: judge.createdAt,
-});
+import generateToken from "../utils/generate.token.js";
 
 export const judgeSignup = async (req, res) => {
   try {
@@ -22,30 +14,40 @@ export const judgeSignup = async (req, res) => {
     });
 
     if (existingUser) {
-      const field = existingUser.email === req.body.email
-        ? "Email"
-        : existingUser.username === req.body.username
-        ? "Username"
-        : "Judge ID";
-      return res.status(400).json({
-        message: `${field} already registered!`,
-      });
+      const field =
+        existingUser.email === req.body.email
+          ? "Email"
+          : existingUser.username === req.body.username
+          ? "Username"
+          : "Judge ID";
+      return res.status(400).json({ message: `${field} already registered!` });
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 12);
+
     const judge = new Judge({
       ...req.body,
       password: hashedPassword,
     });
+
     await judge.save();
 
-    const token = generateToken(judge._id, judge.email, judge.username);
-    const userData = formatJudgeResponse(judge);
+    const token = generateToken(
+      { judgeId: judge.judgeId },
+      judge.email,
+      judge.username
+    );
+
+    const userData = {
+      name: judge.name,
+      username: judge.username,
+      judgeId: judge.judgeId,
+    };
 
     res.status(201).json({
       message: "Judge account created successfully!",
       user: userData,
-      token: token,
+      token,
     });
   } catch (error) {
     console.error("Judge Signup Error:", error);
@@ -71,13 +73,22 @@ export const judgeLogin = async (req, res) => {
       return res.status(400).json({ message: "Incorrect password." });
     }
 
-    const token = generateToken(judge._id, judge.email, judge.username);
-    const userData = formatJudgeResponse(judge);
+    const token = generateToken(
+      { judgeId: judge.judgeId },
+      judge.email,
+      judge.username
+    );
+
+    const userData = {
+      name: judge.name,
+      username: judge.username,
+      judgeId: judge.judgeId,
+    };
 
     res.status(200).json({
       message: "Login successful!",
       user: userData,
-      token: token,
+      token,
     });
   } catch (error) {
     console.error("Judge Login Error:", error);
@@ -85,20 +96,26 @@ export const judgeLogin = async (req, res) => {
   }
 };
 
-export const getCasesForJudge = async (req, res) => {
+export const getOngoingCases = async (req, res) => {
   try {
-    const { username } = req.params;
+    const { judgeid } = req.params;
 
-    const cases = await Case.find({ judgeUsername: username }).sort({ filingDate: -1 });
+    const judge = await Judge.findOne({ judgeId: judgeid });
 
-    if (!cases || cases.length === 0) {
+    if (!judge) {
+      return res.status(404).json({ message: "Judge not found", success: false });
+    }
+
+    if (!judge.caseIds || !judge.caseIds.length) {
       return res.status(200).json({ message: "No cases found for this judge.", cases: [] });
     }
 
-    res.status(200).json(cases);
+    const cases = await Case.find({ caseId: { $in: judge.caseIds } }).sort({ filingDate: -1 });
+
+    res.status(200).json({ message: "Cases fetched successfully", cases, success: true });
   } catch (error) {
     console.error("Error fetching cases for judge:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error", success: false });
   }
 };
 
@@ -122,56 +139,31 @@ export const getBailAppeals = async (req, res) => {
   }
 };
 
-export const getDecidedCases = async (req, res) => {
+export const decideBail = async(req, res) => {
   try {
-    const { username } = req.params;
+    const { caseid } = req.params;
+    const { bailDecision, judgeComments, aiResponse } = req.body;
 
-    const decidedCases = await Case.find(
-      { judgeUsername: username, bailStatus: { $in: ["Accepted", "Declined"] } },
-      "caseId caseTitle detaineeName detaineeUsername groundsOfBail bailFilingDate judgeComments caseSummary bailStatus"
-    ).sort({ filingDate: -1 });
+    const commentsArray = judgeComments 
+      ? judgeComments.split(";").map(c => c.trim()).filter(c => c !== "")
+      : [];
 
-    if (!decidedCases || decidedCases.length === 0) {
-      return res.status(200).json({ message: "No decided cases found for this judge.", decidedCases: [] });
-    }
-
-    res.status(200).json(decidedCases);
-  } catch (error) {
-    console.error("Error fetching decided cases for judge:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-export const bailDecision = async (req, res) => {
-  try {
-    const { caseId, status, comments } = req.body;
-
-    if (!["Accepted", "Declined"].includes(status)) {
-      return res.status(400).json({ message: "Invalid bail status" });
-    }
-
-    const commentArray = comments ? comments.split(",").map(comment => comment.trim()) : [];
-
-    const updatedCase = await Case.findByIdAndUpdate(
-      caseId,
-      {
-        bailStatus: status,
-        judgeComments: commentArray,
-      },
-      { new: true }
+    const updatedCase = await Case.findOneAndUpdate(
+      { caseId : caseid },
+      { bailStatus : bailDecision },
+      { judgeComments: commentsArray },
+      { aiRecommendation: aiResponse },
+      { new : true }
     );
 
-    if (!updatedCase) {
+    if (! updatedCase) {
       return res.status(404).json({ message: "Case not found" });
     }
 
-    res.status(200).json({ message: "Bail decision updated successfully", case: updatedCase });
+    res.status(200).json({ message: "Bail decided", updatedCase });
+    
   } catch (error) {
-    console.error("Error updating bail decision:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error deciding bail:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
-};
-
-export const judgeLogout = (req, res) => {
-  res.status(200).json({ message: "Logout successful" });
 };

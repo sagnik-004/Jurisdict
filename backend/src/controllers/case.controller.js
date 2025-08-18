@@ -1,15 +1,14 @@
 import { Case } from "../models/case.model.js";  
 import { Judge } from "../models/judge.model.js"; 
 import { Lawyer } from "../models/lawyer.model.js"; 
-import { Detainee } from "../models/detainee.model.js"; 
+import { Detainee } from "../models/detainee.model.js";
+import { axiosInstance } from "../utils/axios.js";
 
 export const caseRegister = async (req, res) => {
     try {
-        // Check if case already exists
         const existingCase = await Case.findOne({ caseId: req.body.caseId });
         if (existingCase) return res.status(400).json({ message: "Case already exists" });
 
-        // Define required fields
         const requiredFields = [
             'caseId',
             'caseTitle',
@@ -24,7 +23,6 @@ export const caseRegister = async (req, res) => {
             'lawyerId'
         ];
 
-        // Ensure that `judgeId` and `lawyerId` are stored as integers
         const judgeId = parseInt(req.body.judgeId, 10);
         const lawyerId = parseInt(req.body.lawyerId, 10);
 
@@ -35,25 +33,21 @@ export const caseRegister = async (req, res) => {
             return res.status(400).json({ message: "Invalid Lawyer ID. It should be an integer." });
         }
 
-        // Fetch judge details using judgeId
         const judgeDetails = await Judge.findOne({ judgeId });
         if (!judgeDetails) {
             return res.status(404).json({ message: "Judge not found" });
         }
 
-        // Check if "Justice" is in the judge's name, and add if not
         let judgeName = judgeDetails.name;
         if (!judgeName.startsWith("Justice")) {
             judgeName = `Justice ${judgeName}`;
         }
 
-        // Fetch lawyer details using lawyerId
         const lawyerDetails = await Lawyer.findOne({ lawyerId });
         if (!lawyerDetails) {
             return res.status(404).json({ message: "Lawyer not found" });
         }
 
-        // Fetch detainee details using detaineeUsername (if provided)
         let detaineeDetails = null;
         if (req.body.detaineeUsername) {
             detaineeDetails = await Detainee.findOne({ username: req.body.detaineeUsername });
@@ -68,7 +62,7 @@ export const caseRegister = async (req, res) => {
             bnsSections: req.body.bnsSections,
             courtName: req.body.courtName,
 
-            judgeId, // Store as integer
+            judgeId, 
             judgeName: judgeDetails ? judgeDetails.name : "",
             judgeUsername: judgeDetails ? judgeDetails.username : "", 
 
@@ -78,7 +72,7 @@ export const caseRegister = async (req, res) => {
             caseSummary: req.body.caseSummary,
             groundsOfBail: req.body.groundsOfBail,
 
-            lawyerId,  // Store as integer
+            lawyerId,  
             lawyerUsername: lawyerDetails ? lawyerDetails.username : "",
             lawyerName: lawyerDetails ? lawyerDetails.name : "",  
             
@@ -102,4 +96,48 @@ export const caseRegister = async (req, res) => {
     }
 };
 
-export default caseRegister;
+export const getCaseProcessed = async (req, res) => {
+  try {
+    const { entity, caseid } = req.params;
+    const caseDetails = await Case.findOne({ caseId: caseid });
+
+    if (!caseDetails) {
+      return res.status(404).json({ message: 'Case not found' });
+    }
+
+    const payload = {
+      ...req.body,
+      entity,
+      caseSummary: caseDetails.caseSummary,
+      groundsOfBail: caseDetails.groundsOfBail,
+      judgeComments: caseDetails.judgeComments,
+      caseTitle: caseDetails.caseTitle,
+      bnsSections: caseDetails.bnsSections,
+      casePoints: caseDetails.casePoints,
+    };
+
+    const response = await axiosInstance.post('/find-similar-cases', payload);
+
+    const { aiAssistance, bailDecision, similarCases } = response.data;
+
+    const similarCaseIds = similarCases.map(c => c.caseId);
+    const similarCaseDetails = await Case.find({ caseId: { $in: similarCaseIds } });
+
+    const enrichedSimilarCases = similarCases.map(sc => {
+      const details = similarCaseDetails.find(cd => cd.caseId === sc.caseId);
+      return {
+        similarityPercentage: sc.similarityPercentage,
+        ...details.toObject()
+      };
+    });
+
+    res.status(200).json({
+      aiAssistance,
+      bailDecision,
+      currentCase: caseDetails,
+      similarCases: enrichedSimilarCases
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error processing case', error: error.message });
+  }
+};

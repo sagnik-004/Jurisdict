@@ -31,6 +31,9 @@ const lawyerSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    caseIds: {
+        type: []
     }
 }, { timestamps: true });
 

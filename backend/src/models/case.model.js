@@ -8,14 +8,14 @@ const caseSchema = new Schema({
         unique: true,
         trim: true,
     },
-      caseTitle: {
+    caseTitle: {
         type: String,
         required: true,
         trim: true, 
     },
     bnsSections:{
-        type: Array,
-        required: true, // array of integers
+        type: [],
+        required: true, 
     },
     bailStatus:{
         type: String,
@@ -29,24 +29,16 @@ const caseSchema = new Schema({
         trim: true,
     },
     judgeId:{
-        type: Number, // integer
+        type: Number,
         required: true,
-    },
-    judgeName:{
-        type: String,
-        required: false,
-    },
-    judgeUsername:{
-        type: String,
-        required: false,
     },
     filingDate:{
         type: Date,
         required: true,
     },
     hearingDates:{
-        type: Array,
-        required: true, // array of dates
+        type: [],
+        required: true,
     },
     policeStation:{
         type: String,
@@ -57,11 +49,12 @@ const caseSchema = new Schema({
         required: true,
         minLength: 250,
     },
-    detaineeUsername:{
-        type: String,
-        required: false,
+    casePoints: {
+        type: Map,
+        of: String,
+        required: true
     },
-    detaineeName:{
+    detaineeUsername:{
         type: String,
         required: false,
     },
@@ -70,11 +63,11 @@ const caseSchema = new Schema({
         required: false,
     },
     groundsOfBail:{
-        type: Array, // array of strings
+        type: [], 
         required: true,
     },
     judgeComments:{
-        type: Array, // array of strings
+        type: [], 
         required: false,
     },
     severityOfOffence:{
@@ -82,21 +75,13 @@ const caseSchema = new Schema({
         required: false,
     },
     lawyerId:{
-        type: Number, // lawyer BAR Council id
-        required: false,
-    },
-    lawyerUsername:{
-        type: String,
-        required: false,
-    },
-    lawyerName:{
-        type: String,
+        type: Number,
         required: false,
     },
     aiRecommendation:{
         type: String,
         required: false,
     },
-});
+}, { timestamps: true }, { strict: true });
 
 export const Case = mongoose.model('Case', caseSchema);

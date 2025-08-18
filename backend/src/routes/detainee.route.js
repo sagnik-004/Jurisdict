@@ -1,14 +1,11 @@
 import { Router } from "express";
-import { detaineeSignup, detaineeLogin, detaineeLogout, getOngoingCases, getBailAppeals } from "../controllers/detainee.controller.js";
+import { detaineeSignup, detaineeLogin, getOngoingCases, raiseBail } from "../controllers/detainee.controller.js";
 
 const router = Router();
 
-// Auth routes
 router.post("/signup", detaineeSignup);
 router.post("/login", detaineeLogin);
-router.post("/logout", detaineeLogout);
-
-router.get("/ongoing/:username", getOngoingCases);
-router.get("/bail-appeals/:username", getBailAppeals);
+router.patch("/:caseid/raise-bail", raiseBail);
+router.get("/:username/ongoing-cases", getOngoingCases);
 
 export default router;

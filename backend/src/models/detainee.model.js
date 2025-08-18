@@ -29,6 +29,10 @@ const detaineeSchema = new Schema({
     type: String,
     required: true,
   },
+  caseIds: {
+    type: []
+  }
+    
 }, { timestamps: true });
 
 export const Detainee = mongoose.model('Detainee', detaineeSchema);
