@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import TypeWriter from "./TypeWriter";
+import TypeWriter from "./Typewriter";
 
 const Home = ({ darkMode }) => {
   return (
