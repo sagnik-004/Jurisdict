@@ -23,8 +23,7 @@ import {
   Collapse,
 } from "@mui/material";
 import { Balance, Brightness4, Brightness7 } from "@mui/icons-material";
-import OngoingCases from "../detaineedashboardcomponents/OngoingCases.jsx";
-import BailAppeals from "../detaineedashboardcomponents/BailAppeals.jsx";
+import OngoingCases from "./detaineedashboardcomponents/OngoingCases.jsx";
 
 const DetaineeDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("Add Case");
