@@ -1,91 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from '@mui/icons-material';
 import { axiosInstance } from "../../../lib/axios.js";
-
-const dummyRegisteredCases = [
-  {
-    _id: 'reg001',
-    caseTitle: 'State vs. Sharma',
-    caseId: 'CASE-REG-2025-001',
-    courtName: 'District Court, Asansol',
-    filingDate: '2025-08-15T00:00:00.000Z',
-    judgeId: 'JUDGE-01',
-    caseSummary: 'A case regarding property dispute and forgery in official documents. The preliminary hearings have concluded.'
-  },
-  {
-    _id: 'reg002',
-    caseTitle: 'Verma Corporation vs. Gupta Industries',
-    caseId: 'CASE-REG-2025-002',
-    courtName: 'High Court, Calcutta',
-    filingDate: '2025-07-20T00:00:00.000Z',
-    judgeId: 'JUDGE-05',
-    caseSummary: 'Corporate litigation concerning a breach of contract and intellectual property rights.'
-  }
-];
-
-const dummyAppeals = [
-  {
-    _id: 'app001',
-    caseTitle: 'Appeal on behalf of Rohan Mehra',
-    caseId: 'CASE-APP-2025-001',
-    courtName: 'Sessions Court, Asansol',
-    filingDate: '2025-08-22T00:00:00.000Z',
-    judgeId: 'JUDGE-02',
-    caseSummary: 'Bail appeal for Rohan Mehra, detained in connection with a cyber-fraud case. Grounds for appeal include lack of direct evidence.'
-  },
-  {
-    _id: 'app002',
-    caseTitle: 'Appeal for Sunita Devi',
-    caseId: 'CASE-APP-2025-002',
-    courtName: 'District Court, Asansol',
-    filingDate: '2025-08-25T00:00:00.000Z',
-    judgeId: 'JUDGE-01',
-    caseSummary: 'An appeal challenging the initial remand order, citing procedural errors by the arresting authority.'
-  }
-];
-
-const CaseItem = ({ caseItem, expandedCase, onToggle }) => {
-  const isExpanded = expandedCase === caseItem._id;
-  return (
-    <div
-      className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.01]"
-      onClick={() => onToggle(caseItem._id)}
-    >
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            {caseItem.caseTitle}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Case ID: {caseItem.caseId}
-          </p>
-        </div>
-        <svg
-          className={`w-6 h-6 text-gray-500 dark:text-gray-400 transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </div>
-      {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-          <p><strong>Court:</strong> {caseItem.courtName}</p>
-          <p><strong>Filing Date:</strong> {new Date(caseItem.filingDate).toLocaleDateString()}</p>
-          <p><strong>Judge ID:</strong> {caseItem.judgeId}</p>
-          <p><strong>Summary:</strong> {caseItem.caseSummary}</p>
-        </div>
-      )}
-    </div>
-  );
-};
+import Case from './Case.jsx';
 
 const OngoingCases = () => {
   const [activeTab, setActiveTab] = useState('registered');
   const [expandedCase, setExpandedCase] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [registeredCases, setRegisteredCases] = useState([]);
+  const [appeals, setAppeals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const user = { lawyerId: 10002 };
+
+  useEffect(() => {
+    const fetchOngoingCases = async () => {
+      if (!user?.lawyerId) {
+        setError("Lawyer ID not found.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get(`/lawyer/${user.lawyerId}/ongoing-cases`);
+        if (response.data && response.data.success) {
+          const allCases = response.data.cases;
+          setRegisteredCases(allCases.filter(c => c.bailStatus === ""));
+          setAppeals(allCases.filter(c => c.bailStatus === "Pending to lawyer"));
+        } else {
+          setError(response.data.message || "Failed to fetch cases.");
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || "An error occurred while fetching cases.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOngoingCases();
+  }, [user.lawyerId]);
 
   const toggleCaseDescription = (caseId) => {
     setExpandedCase((prev) => (prev === caseId ? null : caseId));
@@ -102,13 +57,23 @@ const OngoingCases = () => {
 
   const renderCaseList = (cases, type) => {
     const caseList = filteredCases(cases);
+
+    if (loading) {
+        return <p className="text-center text-gray-500 dark:text-gray-400 mt-8">Loading cases...</p>;
+    }
+    
+    if (error) {
+        return <p className="text-center text-red-500 mt-8">Error: {error}</p>;
+    }
+
     if (caseList.length === 0) {
       return <p className="text-center text-gray-500 dark:text-gray-400 mt-8">No {type} cases found.</p>;
     }
+    
     return (
       <div className="space-y-4">
         {caseList.map((caseItem) => (
-          <CaseItem
+          <Case
             key={caseItem._id}
             caseItem={caseItem}
             expandedCase={expandedCase}
@@ -163,12 +128,11 @@ const OngoingCases = () => {
       </div>
 
       <div className="mt-6">
-        {activeTab === 'registered' && renderCaseList(dummyRegisteredCases, 'registered')}
-        {activeTab === 'appeals' && renderCaseList(dummyAppeals, 'appeals')}
+        {activeTab === 'registered' && renderCaseList(registeredCases, 'registered')}
+        {activeTab === 'appeals' && renderCaseList(appeals, 'appeals')}
       </div>
     </div>
   );
 };
 
 export default OngoingCases;
-
