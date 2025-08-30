@@ -5,17 +5,22 @@ import {
   Menu,
   ChevronLeft,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { axiosInstance } from "../../lib/axios.js";
 import Sidebar from "./lawyerdashboardcomponents/Sidebar";
 import AddCase from "../common/AddCase";
 import OngoingCases from "./lawyerdashboardcomponents/OngoingCases";
 import LawyerTrackBail from "./lawyerdashboardcomponents/LawyerTrackBail";
 import FAQs from "./lawyerdashboardcomponents/FAQs";
+import DecidedCases from "./lawyerdashboardcomponents/DecidedCases";
 
 const LawyerDashboard = () => {
   const [selectedItem, setSelectedItem] = useState("Add Case");
   const [mode, setMode] = useState("light");
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -31,6 +36,24 @@ const LawyerDashboard = () => {
     setIsSidebarVisible((prev) => !prev);
   };
 
+  const handleLogout = () => {
+    setIsLoading(true);
+    setTimeout(async () => {
+      try {
+        await axiosInstance.post("/lawyer/logout");
+      } catch (error) {
+        console.error(
+          "Server logout failed, proceeding with client-side logout:",
+          error
+        );
+      }
+
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      navigate("/landing");
+    }, 2000);
+  };
+
   const renderContent = () => {
     switch (selectedItem) {
       case "Add Case":
@@ -39,6 +62,8 @@ const LawyerDashboard = () => {
         return <OngoingCases />;
       case "Track Bail Status":
         return <LawyerTrackBail />;
+      case "Decided Cases":
+        return <DecidedCases />;
       case "FAQs":
         return <FAQs />;
       default:
@@ -48,11 +73,19 @@ const LawyerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      {isLoading && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex flex-col items-center justify-center z-[100]">
+          <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-orange-500"></div>
+          <p className="text-white text-lg mt-4">Logging out...</p>
+        </div>
+      )}
+
       <Sidebar
         user={user}
         selectedItem={selectedItem}
         setSelectedItem={setSelectedItem}
         isSidebarVisible={isSidebarVisible}
+        handleLogout={handleLogout}
       />
 
       <main

@@ -7,12 +7,14 @@ import {
   Balance,
   Logout,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import { axiosInstance } from "../../../lib/axios.js";
 
-const Sidebar = ({ user, selectedItem, setSelectedItem, isSidebarVisible }) => {
-  const navigate = useNavigate();
-
+const Sidebar = ({
+  user,
+  selectedItem,
+  setSelectedItem,
+  isSidebarVisible,
+  handleLogout,
+}) => {
   const getInitials = (name) => {
     if (!name) return "";
     const nameParts = name.split(" ");
@@ -22,20 +24,11 @@ const Sidebar = ({ user, selectedItem, setSelectedItem, isSidebarVisible }) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  const handleLogout = async () => {
-    try {
-      await axiosInstance.post("/lawyer/logout");
-      localStorage.removeItem("user");
-      navigate("/landing");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   const menuItems = [
     { text: "Add Case", icon: <AddCircleOutline /> },
     { text: "Ongoing Cases", icon: <Assignment /> },
     { text: "Track Bail Status", icon: <TrackChanges /> },
+    { text: "Decided Cases", icon: <Balance /> },
     { text: "FAQs", icon: <HelpOutline /> },
   ];
 
