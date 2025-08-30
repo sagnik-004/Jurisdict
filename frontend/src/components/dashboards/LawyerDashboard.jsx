@@ -10,7 +10,7 @@ import { axiosInstance } from "../../lib/axios.js";
 import Sidebar from "./lawyerdashboardcomponents/Sidebar";
 import AddCase from "../common/AddCase";
 import OngoingCases from "./lawyerdashboardcomponents/OngoingCases";
-import LawyerTrackBail from "./lawyerdashboardcomponents/LawyerTrackBail";
+import TrackBailStatus from "./lawyerdashboardcomponents/TrackBailStatus.jsx";
 import FAQs from "./lawyerdashboardcomponents/FAQs";
 import DecidedCases from "./lawyerdashboardcomponents/DecidedCases";
 
@@ -61,7 +61,7 @@ const LawyerDashboard = () => {
       case "Ongoing Cases":
         return <OngoingCases />;
       case "Track Bail Status":
-        return <LawyerTrackBail />;
+        return <TrackBailStatus />;
       case "Decided Cases":
         return <DecidedCases />;
       case "FAQs":

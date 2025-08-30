@@ -11,8 +11,7 @@ const OngoingCases = () => {
   const [appeals, setAppeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const user = { lawyerId: 10002 };
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchOngoingCases = async () => {
@@ -24,6 +23,7 @@ const OngoingCases = () => {
 
       try {
         setLoading(true);
+        setError(null);
         const response = await axiosInstance.get(`/lawyer/${user.lawyerId}/ongoing-cases`);
         if (response.data && response.data.success) {
           const allCases = response.data.cases;
@@ -40,7 +40,7 @@ const OngoingCases = () => {
     };
 
     fetchOngoingCases();
-  }, [user.lawyerId]);
+  }, [user?.lawyerId]);
 
   const toggleCaseDescription = (caseId) => {
     setExpandedCase((prev) => (prev === caseId ? null : caseId));

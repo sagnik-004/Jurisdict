@@ -1,127 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "@mui/icons-material";
-
-const dummyBailGranted = [
-  {
-    _id: "grant001",
-    caseTitle: "Priya Singh vs. State",
-    caseId: "CASE-DEC-2025-001",
-    courtName: "District Court, Asansol",
-    verdictDate: "2025-08-10T00:00:00.000Z",
-    judgeId: "JUDGE-01",
-    judgeComments:
-      "Bail granted on the grounds of insufficient evidence for continued detention. The accused has been cooperative.",
-  },
-  {
-    _id: "grant002",
-    caseTitle: "Amit Kumar Bail Application",
-    caseId: "CASE-DEC-2025-002",
-    courtName: "High Court, Calcutta",
-    verdictDate: "2025-07-28T00:00:00.000Z",
-    judgeId: "JUDGE-05",
-    judgeComments:
-      "Considering the defendant's clean prior record and community ties, bail is granted with conditions.",
-  },
-];
-
-const dummyBailDeclined = [
-  {
-    _id: "decline001",
-    caseTitle: "State vs. Rajeev Verma",
-    caseId: "CASE-DEC-2025-003",
-    courtName: "Sessions Court, Asansol",
-    verdictDate: "2025-08-18T00:00:00.000Z",
-    judgeId: "JUDGE-02",
-    judgeComments:
-      "Bail is declined due to the serious nature of the charges and the potential risk of witness tampering.",
-  },
-  {
-    _id: "decline002",
-    caseTitle: "Narcotics Case No. 78",
-    caseId: "CASE-DEC-2025-004",
-    courtName: "Special Court, Asansol",
-    verdictDate: "2025-08-05T00:00:00.000Z",
-    judgeId: "JUDGE-03",
-    judgeComments:
-      "Given the quantity of illicit substances involved and flight risk, the bail application is hereby declined.",
-  },
-];
-
-const CaseItem = ({ caseItem, expandedCase, onToggle, searchResult }) => {
-  const isExpanded = expandedCase === caseItem._id;
-  const isGranted = caseItem.status === "Granted";
-
-  return (
-    <div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.01]"
-      onClick={() => onToggle(caseItem._id)}
-    >
-      <div className="p-4 cursor-pointer">
-        <div className="flex justify-between items-center">
-          <div className="flex-grow">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              {caseItem.caseTitle}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Case ID: {caseItem.caseId}
-            </p>
-          </div>
-          {searchResult && (
-            <span
-              className={`font-semibold px-2.5 py-1 rounded-full text-xs ${
-                isGranted
-                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-              }`}
-            >
-              Bail {caseItem.status}
-            </span>
-          )}
-          <svg
-            className={`w-6 h-6 ml-4 text-gray-500 dark:text-gray-400 transform transition-transform duration-300 ${
-              isExpanded ? "rotate-180" : ""
-            }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M19 9l-7 7-7-7"
-            ></path>
-          </svg>
-        </div>
-      </div>
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-            <p>
-              <strong>Court:</strong> {caseItem.courtName}
-            </p>
-            <p>
-              <strong>Verdict Date:</strong>{" "}
-              {new Date(caseItem.verdictDate).toLocaleDateString()}
-            </p>
-            <p>
-              <strong>Presiding Judge ID:</strong> {caseItem.judgeId}
-            </p>
-            <p>
-              <strong>Judge's Comments:</strong> {caseItem.judgeComments}
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+import { axiosInstance } from "../../../lib/axios.js";
+import Case from "./Case.jsx";
 
 const DecidedCases = () => {
   const [activeTab, setActiveTab] = useState("granted");
   const [expandedCaseId, setExpandedCaseId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [allCases, setAllCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    const fetchDecidedCases = async () => {
+      if (!user?.lawyerId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axiosInstance.get(
+          `/lawyer/${user.lawyerId}/ongoing-cases`
+        );
+        setAllCases(response.data.cases || []);
+      } catch (err) {
+        console.error("Error fetching decided cases:", err);
+        setError("Failed to fetch cases. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDecidedCases();
+  }, [user?.lawyerId]);
+
+  const grantedCases = allCases.filter((c) => c.bailStatus === "Accepted");
+  const declinedCases = allCases.filter((c) => c.bailStatus === "Declined");
 
   const toggleExpand = (caseId) => {
     setExpandedCaseId((prev) => (prev === caseId ? null : caseId));
@@ -130,32 +45,44 @@ const DecidedCases = () => {
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   const searchResults = searchQuery
-    ? [
-        ...dummyBailGranted
-          .filter((c) =>
-            c.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-          .map((c) => ({ ...c, status: "Granted" })),
-        ...dummyBailDeclined
-          .filter((c) =>
-            c.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-          .map((c) => ({ ...c, status: "Declined" })),
-      ]
+    ? allCases.filter(
+        (c) =>
+          (c.bailStatus === "Accepted" || c.bailStatus === "Declined") &&
+          c.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : [];
 
-  const renderCaseList = (cases) => (
-    <div className="space-y-4">
-      {cases.map((caseItem) => (
-        <CaseItem
-          key={caseItem._id}
-          caseItem={caseItem}
-          expandedCase={expandedCaseId}
-          onToggle={toggleExpand}
-        />
-      ))}
-    </div>
-  );
+  const renderCaseList = (cases) => {
+    if (loading) {
+      return (
+        <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
+          Loading...
+        </p>
+      );
+    }
+    if (error) {
+      return <p className="text-center text-red-500 mt-8">{error}</p>;
+    }
+    if (cases.length === 0) {
+      return (
+        <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
+          No cases to display in this category.
+        </p>
+      );
+    }
+    return (
+      <div className="space-y-4">
+        {cases.map((caseItem) => (
+          <Case
+            key={caseItem._id}
+            caseItem={caseItem}
+            expandedCase={expandedCaseId}
+            onToggle={toggleExpand}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
@@ -183,17 +110,7 @@ const DecidedCases = () => {
             Search Results ({searchResults.length})
           </h3>
           {searchResults.length > 0 ? (
-            <div className="space-y-4">
-              {searchResults.map((caseItem) => (
-                <CaseItem
-                  key={caseItem._id}
-                  caseItem={caseItem}
-                  expandedCase={expandedCaseId}
-                  onToggle={toggleExpand}
-                  searchResult={true}
-                />
-              ))}
-            </div>
+            renderCaseList(searchResults)
           ) : (
             <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
               No cases found matching your search.
@@ -212,7 +129,7 @@ const DecidedCases = () => {
                     : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500"
                 }`}
               >
-                Bail Granted
+                Bail Accepted
               </button>
               <button
                 onClick={() => setActiveTab("declined")}
@@ -227,8 +144,8 @@ const DecidedCases = () => {
             </nav>
           </div>
           <div className="mt-6">
-            {activeTab === "granted" && renderCaseList(dummyBailGranted)}
-            {activeTab === "declined" && renderCaseList(dummyBailDeclined)}
+            {activeTab === "granted" && renderCaseList(grantedCases)}
+            {activeTab === "declined" && renderCaseList(declinedCases)}
           </div>
         </>
       )}
