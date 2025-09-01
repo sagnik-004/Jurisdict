@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios.js";
 
 const ProtectedRoute = ({ children, userType }) => {
   const [user, setUser] = useState(null);
@@ -9,30 +9,30 @@ const ProtectedRoute = ({ children, userType }) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        // Retrieve the token from local storage
         const token = localStorage.getItem("token");
-
         if (!token) {
           throw new Error("No token found");
         }
 
-        // Send the token in the Authorization header
-        const response = await axios.get("https://jurisdict-backend.onrender.com/auth/refresh", {
+        const response = await axiosInstance.get("/auth/refresh", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!response.data?.user) {
-          throw new Error("Invalid refresh response");
+        const { user, token: newToken } = response.data;
+
+        if (!user || !newToken) {
+          throw new Error("Invalid authentication response");
         }
 
-        setUser(response.data.user);
+        localStorage.setItem("token", newToken);
+        setUser(user);
+
       } catch (error) {
-        console.error("Authentication failed:", error);
-        setUser(null);
-        // Clear the token from local storage if it's invalid
+        console.error("Authentication failed:", error.message);
         localStorage.removeItem("token");
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -49,12 +49,10 @@ const ProtectedRoute = ({ children, userType }) => {
     );
   }
 
-  // If no user, redirect to landing page
   if (!user) {
     return <Navigate to="/landing" replace />;
   }
 
-  // If userType is specified, check if user has correct type
   if (userType && user.type !== userType) {
     return <Navigate to="/unauthorized" replace />;
   }

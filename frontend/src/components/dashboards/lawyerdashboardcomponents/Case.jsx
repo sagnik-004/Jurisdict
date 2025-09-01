@@ -4,6 +4,10 @@ import AIPopup from "../../common/AIPopup.jsx";
 
 const Case = ({ caseItem, expandedCase, onToggle }) => {
   const [showAIPopup, setShowAIPopup] = useState(false);
+  const [aiData, setAiData] = useState(null);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [aiError, setAiError] = useState(null);
+
   const isExpanded = expandedCase === caseItem._id;
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -16,15 +20,27 @@ const Case = ({ caseItem, expandedCase, onToggle }) => {
   const handleAskAI = async (e) => {
     e.stopPropagation();
     setShowAIPopup(true);
+    setIsLoadingAI(true);
+    setAiError(null);
+    setAiData(null);
     try {
       const entityType = getEntityType();
       const response = await axiosInstance.post(
         `/case/${entityType}/${caseItem.caseId}/process-case`
       );
-      console.log("AI response:", response.data);
+      setAiData(response.data);
     } catch (err) {
       console.error("Error processing case with AI:", err);
+      setAiError("Failed to fetch AI analysis. Please try again.");
+    } finally {
+      setIsLoadingAI(false);
     }
+  };
+
+  const handleClosePopup = () => {
+    setShowAIPopup(false);
+    setAiData(null);
+    setAiError(null);
   };
 
   const handleRaiseBail = async (e) => {
@@ -384,8 +400,10 @@ const Case = ({ caseItem, expandedCase, onToggle }) => {
 
       <AIPopup
         isOpen={showAIPopup}
-        onClose={() => setShowAIPopup(false)}
-        aiRecommendation={caseItem.aiRecommendation}
+        onClose={handleClosePopup}
+        data={aiData}
+        isLoading={isLoadingAI}
+        error={aiError}
       />
     </>
   );

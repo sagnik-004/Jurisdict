@@ -1,4 +1,5 @@
 import { Case } from "../models/case.model.js";
+import { Judge } from "../models/judge.model.js";
 import { Lawyer } from "../models/lawyer.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generate.token.js";
@@ -136,27 +137,53 @@ export const getOngoingCases = async (req, res) => {
     const { lawyerid } = req.params;
 
     if (!lawyerid) {
-      return res.status(400).json({ message: "Lawyer ID is required", success: false });
+      return res
+        .status(400)
+        .json({ message: "Lawyer ID is required", success: false });
     }
 
     const lawyer = await Lawyer.findOne({ lawyerId: lawyerid });
 
     if (!lawyer) {
-      return res.status(404).json({ message: "Lawyer not found", success: false });
+      return res
+        .status(404)
+        .json({ message: "Lawyer not found", success: false });
     }
 
     if (!lawyer.caseIds || !lawyer.caseIds.length) {
-      return res.status(404).json({ message: "No ongoing cases found", cases: [], success: false });
+      return res
+        .status(200)
+        .json({ message: "No ongoing cases found", cases: [], success: true });
     }
 
     const cases = await Case.find({ caseId: { $in: lawyer.caseIds } });
 
-    res.status(200).json({
-      message: "Ongoing cases fetched successfully!",
-      cases,
-      success: true
+    if (!cases.length) {
+      return res
+        .status(200)
+        .json({ message: "No ongoing cases found", cases: [], success: true });
+    }
+
+    const judgeIds = [...new Set(cases.map((c) => c.judgeId))];
+
+    const judges = await Judge.find({ judgeId: { $in: judgeIds } });
+
+    const judgeMap = judges.reduce((map, judge) => {
+      map[judge.judgeId] = judge.name;
+      return map;
+    }, {});
+
+    const casesWithJudgeNames = cases.map((caseDoc) => {
+      const caseObj = caseDoc.toObject();
+      caseObj.judgeName = judgeMap[caseDoc.judgeId] || "Not Found";
+      return caseObj;
     });
 
+    res.status(200).json({
+      message: "Ongoing cases fetched successfully!",
+      cases: casesWithJudgeNames,
+      success: true,
+    });
   } catch (error) {
     console.error("Error fetching ongoing cases:", error);
     res.status(500).json({ message: "Internal Server Error", success: false });

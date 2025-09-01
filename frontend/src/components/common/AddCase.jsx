@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { axiosInstance } from "../../lib/axios.js";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddCase = () => {
   const [formData, setFormData] = useState({
@@ -32,6 +35,7 @@ const AddCase = () => {
     witnessThreats: false,
     evidenceTampering: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -54,12 +58,25 @@ const AddCase = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formData.caseSummary.length < 250) {
-      alert("Case Summary must be at least 250 characters.");
+      toast.error("Case Summary must be at least 250 characters.");
       return;
     }
-    console.log("Case submitted successfully!", formData);
+
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.post("/case/register", formData);
+      if (response.status === 201) {
+        toast.success("Case registered successfully!");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "An error occurred while submitting the case.";
+      toast.error(errorMessage);
+      console.error("Submission error:", error.response || error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const FormSection = ({ title, icon, children }) => (
@@ -165,6 +182,17 @@ const AddCase = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
         Add New Case
       </h1>
@@ -484,9 +512,10 @@ const AddCase = () => {
       <div className="flex justify-center">
         <button
           onClick={handleSubmit}
-          className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300"
+          disabled={isLoading}
+          className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 disabled:bg-blue-400 disabled:cursor-not-allowed"
         >
-          Submit Case
+          {isLoading ? "Submitting..." : "Submit Case"}
         </button>
       </div>
     </div>
