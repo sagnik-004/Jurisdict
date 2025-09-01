@@ -4,33 +4,62 @@ import { Lawyer } from "../models/lawyer.model.js";
 import { Detainee } from "../models/detainee.model.js";
 import { axiosInstance } from "../utils/axios.js";
 
+const generateRandomId = (length) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
 export const caseRegister = async (req, res) => {
     try {
-        const existingCase = await Case.findOne({ caseId: req.body.caseId });
-        if (existingCase) return res.status(400).json({ message: "Case already exists" });
+        const {
+            caseTitle,
+            filingDate,
+            courtName,
+            policeStation,
+            detaineeUsername,
+            lawyerId: lawyerIdStr,
+            judgeId: judgeIdStr,
+            crimeType,
+            bnsSections,
+            severityOfOffence,
+            allegedRole,
+            caseSummary,
+            accusedAge,
+            medicalConditions,
+            hasPermanentAddress,
+            isEmployed,
+            ownsProperty,
+            hasLocalFamily,
+            isSoleFamilyEarner,
+            daysInDetention,
+            hasPriorRecord,
+            priorConvictionSections,
+            historyOfViolence,
+            holdsPassport,
+            hasFinancialMeansToTravel,
+            allegedOrganizedCrimeLinks,
+            availableEvidence,
+            witnessThreats,
+            evidenceTampering,
+        } = req.body;
 
-        const requiredFields = [
-            'caseId',
-            'caseTitle',
-            'bnsSections',
-            'courtName',
-            'judgeId',
-            'filingDate',
-            'hearingDates',
-            'policeStation',
-            'caseSummary',
-            'groundsOfBail',
-            'lawyerId'
-        ];
-
-        const judgeId = parseInt(req.body.judgeId, 10);
-        const lawyerId = parseInt(req.body.lawyerId, 10);
-
-        if (isNaN(judgeId)) {
-            return res.status(400).json({ message: "Invalid Judge ID. It should be an integer." });
+        const caseId = generateRandomId(10);
+        const existingCase = await Case.findOne({ caseId });
+        if (existingCase) {
+            return res.status(400).json({ message: "Generated Case ID already exists, please try again." });
         }
-        if (isNaN(lawyerId)) {
-            return res.status(400).json({ message: "Invalid Lawyer ID. It should be an integer." });
+        
+        if (caseSummary.length < 250) {
+            return res.status(400).json({ message: "Case Summary must be at least 250 characters." });
+        }
+
+        const judgeId = parseInt(judgeIdStr, 10);
+        if (isNaN(judgeId)) {
+            return res.status(400).json({ message: "Invalid Judge ID. It must be an integer." });
         }
 
         const judgeDetails = await Judge.findOne({ judgeId });
@@ -38,52 +67,69 @@ export const caseRegister = async (req, res) => {
             return res.status(404).json({ message: "Judge not found" });
         }
 
-        let judgeName = judgeDetails.name;
-        if (!judgeName.startsWith("Justice")) {
-            judgeName = `Justice ${judgeName}`;
-        }
-
-        const lawyerDetails = await Lawyer.findOne({ lawyerId });
-        if (!lawyerDetails) {
-            return res.status(404).json({ message: "Lawyer not found" });
+        let lawyerDetails = null;
+        let lawyerId = null;
+        if (lawyerIdStr) {
+            lawyerId = parseInt(lawyerIdStr, 10);
+            if (isNaN(lawyerId)) {
+                return res.status(400).json({ message: "Invalid Lawyer ID. It must be an integer." });
+            }
+            lawyerDetails = await Lawyer.findOne({ lawyerId });
+            if (!lawyerDetails) {
+                return res.status(404).json({ message: "Lawyer not found" });
+            }
         }
 
         let detaineeDetails = null;
-        if (req.body.detaineeUsername) {
-            detaineeDetails = await Detainee.findOne({ username: req.body.detaineeUsername });
+        if (detaineeUsername) {
+            detaineeDetails = await Detainee.findOne({ username: detaineeUsername });
             if (!detaineeDetails) {
                 return res.status(404).json({ message: "Detainee not found" });
             }
         }
 
+        const casePoints = new Map([
+            ["bnsSections", bnsSections.join(', ')],
+            ["crimeType", crimeType],
+            ["accusedAge", accusedAge],
+            ["daysInDetention", daysInDetention],
+            ["hasPriorRecord", String(hasPriorRecord)],
+            ["priorConvictionSections", priorConvictionSections.join(', ')],
+            ["hasPermanentAddress", String(hasPermanentAddress)],
+            ["ownsProperty", String(ownsProperty)],
+            ["isEmployed", String(isEmployed)],
+            ["hasLocalFamily", String(hasLocalFamily)],
+            ["holdsPassport", String(holdsPassport)],
+            ["hasFinancialMeansToTravel", String(hasFinancialMeansToTravel)],
+            ["availableEvidence", availableEvidence.join(', ')],
+            ["witnessThreatReports", String(witnessThreats)],
+            ["evidenceTamperingReports", String(evidenceTampering)],
+            ["allegedOrganizedCrimeLinks", String(allegedOrganizedCrimeLinks)],
+            ["historyOfViolence", String(historyOfViolence)],
+            ["medicalConditions", medicalConditions || "None reported"],
+            ["isSoleFamilyEarner", String(isSoleFamilyEarner)],
+            ["allegedRoleInCrime", allegedRole],
+        ]);
+
         const newCase = new Case({
-            caseId: req.body.caseId,
-            caseTitle: req.body.caseTitle,
-            bnsSections: req.body.bnsSections,
-            courtName: req.body.courtName,
-
-            judgeId, 
-            judgeName: judgeDetails ? judgeDetails.name : "",
-            judgeUsername: judgeDetails ? judgeDetails.username : "", 
-
-            filingDate: req.body.filingDate,
-            hearingDates: req.body.hearingDates,
-            policeStation: req.body.policeStation,
-            caseSummary: req.body.caseSummary,
-            groundsOfBail: req.body.groundsOfBail,
-
-            lawyerId,  
-            lawyerUsername: lawyerDetails ? lawyerDetails.username : "",
-            lawyerName: lawyerDetails ? lawyerDetails.name : "",  
-            
-            aiRecommendation: req.body.aiRecommendation || '', 
-
-            detaineeUsername: req.body.detaineeUsername,
-            detaineeName: detaineeDetails ? detaineeDetails.name : "",
-
-            bailFilingDate: req.body.bailFilingDate, 
-            judgeComments: req.body.judgeComments || [], 
-            severityOfOffence: req.body.severityOfOffence || '', 
+            caseId,
+            caseTitle,
+            bnsSections,
+            bailStatus: "",
+            courtName,
+            judgeId,
+            filingDate,
+            hearingDates: [],
+            policeStation,
+            caseSummary,
+            casePoints,
+            detaineeUsername: detaineeUsername || null,
+            bailFilingDate: null,
+            groundsOfBail: [],
+            judgeComments: [],
+            severityOfOffence,
+            lawyerId,
+            aiRecommendation: "",
         });
 
         await newCase.save();
