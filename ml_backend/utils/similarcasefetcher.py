@@ -2,11 +2,10 @@ import os
 import re
 from dotenv import load_dotenv
 from pymongo import MongoClient
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import math
 import hashlib
 import time
+from collections import Counter
 from bson.objectid import ObjectId
 
 load_dotenv()
@@ -15,14 +14,6 @@ MONGO_DB = os.getenv("MONGO_DB", "test")
 client = MongoClient(MONGO_URI) if MONGO_URI else MongoClient()
 db = client.get_database(MONGO_DB)
 case_collection = db.get_collection("cases")
-
-try:
-    from sentence_transformers import SentenceTransformer
-    sbert = SentenceTransformer("all-MiniLM-L6-v2")
-
-except Exception as e:
-
-    sbert = None
 
 LEGAL_KEYWORDS = {
     'violent_crimes': ['murder', 'assault', 'battery', 'violence', 'attack', 'homicide', 'manslaughter', 'grievous hurt', 'attempt to murder'],
@@ -44,12 +35,64 @@ BAIL_FACTORS = {
     'personal_factors': ['age', 'health', 'family', 'employment', 'roots', 'community ties', 'medical']
 }
 
+STOPWORDS = {
+    'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'has', 'he', 'in', 'is', 'it', 
+    'its', 'of', 'on', 'that', 'the', 'to', 'was', 'will', 'with', 'or', 'but', 'not', 'this', 
+    'have', 'had', 'what', 'when', 'where', 'who', 'which', 'why', 'how', 'all', 'any', 'both', 
+    'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'only', 'own', 'same', 
+    'so', 'than', 'too', 'very', 'can', 'just', 'should', 'now'
+}
+
 def _clean_and_tokenize(text):
     text = str(text or "").lower()
     text = re.sub(r'[^\w\s]', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
-    tokens = text.split()
+    tokens = [token for token in text.split() if token not in STOPWORDS and len(token) > 2]
     return text, tokens
+
+def _cosine_similarity(vec1, vec2):
+    if not vec1 or not vec2:
+        return 0.0
+    
+    dot_product = sum(a * b for a, b in zip(vec1, vec2))
+    magnitude1 = math.sqrt(sum(a * a for a in vec1))
+    magnitude2 = math.sqrt(sum(b * b for b in vec2))
+    
+    if magnitude1 == 0 or magnitude2 == 0:
+        return 0.0
+    
+    return dot_product / (magnitude1 * magnitude2)
+
+def _create_tfidf_vector(tokens, vocabulary, idf_scores):
+    tf_counter = Counter(tokens)
+    total_tokens = len(tokens)
+    
+    vector = []
+    for word in vocabulary:
+        tf = tf_counter.get(word, 0) / total_tokens if total_tokens > 0 else 0
+        tfidf = tf * idf_scores.get(word, 0)
+        vector.append(tfidf)
+    
+    return vector
+
+def _build_vocabulary_and_idf(all_documents):
+    vocabulary = set()
+    doc_word_counts = []
+    
+    for doc_tokens in all_documents:
+        vocabulary.update(doc_tokens)
+        doc_word_counts.append(set(doc_tokens))
+    
+    vocabulary = sorted(list(vocabulary))
+    total_docs = len(all_documents)
+    
+    idf_scores = {}
+    for word in vocabulary:
+        docs_containing_word = sum(1 for doc_words in doc_word_counts if word in doc_words)
+        idf = math.log(total_docs / (docs_containing_word + 1))
+        idf_scores[word] = idf
+    
+    return vocabulary, idf_scores
 
 def _extract_legal_themes(text, tokens):
     themes = {}
@@ -171,25 +214,36 @@ def _generate_case_signature(case_data):
     signature_data = f"{case_id}|{','.join(sections)}|{','.join(grounds)}"
     return hashlib.md5(signature_data.encode()).hexdigest()
 
-def _semantic_search(current_embedding, current_case_id, candidates):
-    try:
-        if not sbert or not current_embedding:
-            return []
-        
-        results = []
-        for case in candidates:
-            case_text = _compose_enhanced_text(case)
-            case_embedding = sbert.encode([case_text])[0].tolist()
-            similarity = cosine_similarity([current_embedding], [case_embedding])[0][0]
-            
-            if similarity > 0.3:
-                case['score'] = similarity
-                results.append(case)
-        
-        results.sort(key=lambda x: x['score'], reverse=True)
-        return results[:50]
-    except:
-        return []
+def _lightweight_semantic_similarity(current_tokens, case_tokens):
+    if not current_tokens or not case_tokens:
+        return 0.0
+    
+    current_set = set(current_tokens)
+    case_set = set(case_tokens)
+    
+    intersection = len(current_set & case_set)
+    union = len(current_set | case_set)
+    
+    jaccard_sim = intersection / union if union > 0 else 0.0
+    
+    current_counter = Counter(current_tokens)
+    case_counter = Counter(case_tokens)
+    
+    common_words = current_set & case_set
+    if not common_words:
+        return jaccard_sim
+    
+    weighted_overlap = 0
+    total_weight = 0
+    
+    for word in common_words:
+        weight = min(current_counter[word], case_counter[word])
+        weighted_overlap += weight
+        total_weight += max(current_counter[word], case_counter[word])
+    
+    weighted_sim = weighted_overlap / total_weight if total_weight > 0 else 0.0
+    
+    return (jaccard_sim * 0.4 + weighted_sim * 0.6)
 
 def find_similar_cases(current_case_data):
     try:
@@ -197,8 +251,6 @@ def find_similar_cases(current_case_data):
         current_case_id = current_case_data.get("caseId")
         current_signature = _generate_case_signature(current_case_data)
         current_text = _compose_enhanced_text(current_case_data)
-        
-        current_embedding = sbert.encode([current_text])[0].tolist() if sbert else []
         
         filter_condition = {"bailStatus": {"$in": ["Accepted", "Declined"]}}
         if current_case_id:
@@ -208,11 +260,9 @@ def find_similar_cases(current_case_data):
             filter_condition,
             {"_id": 0, "caseId": 1, "caseTitle": 1, "caseSummary": 1, 
              "bnsSections": 1, "groundsOfBail": 1, "bailStatus": 1}
-        ).limit(200)
-        similar_candidates = list(cursor)
+        ).limit(300)
         
-        if sbert and current_embedding:
-            similar_candidates = _semantic_search(current_embedding, current_case_id, similar_candidates)
+        similar_candidates = list(cursor)
         
         current_clean_text, current_tokens = _clean_and_tokenize(current_text)
         current_themes = _extract_legal_themes(current_clean_text, current_tokens)
@@ -234,16 +284,7 @@ def find_similar_cases(current_case_data):
             case_text = _compose_enhanced_text(case)
             case_clean_text, case_tokens = _clean_and_tokenize(case_text)
             
-            semantic_sim = 0
-            if "score" in case:
-                semantic_sim = min(case["score"], 1.0)
-            elif sbert and current_embedding:
-                try:
-                    case_embedding = sbert.encode([case_text])[0].tolist()
-                    semantic_sim = cosine_similarity([current_embedding], [case_embedding])[0][0]
-                    semantic_sim = max(0, min(semantic_sim, 1.0))
-                except:
-                    semantic_sim = 0
+            semantic_sim = _lightweight_semantic_similarity(current_tokens, case_tokens)
             
             theme_sim = _compute_theme_similarity(current_themes, 
                 _extract_legal_themes(case_clean_text, case_tokens))
@@ -260,8 +301,8 @@ def find_similar_cases(current_case_data):
             grounds_sim = grounds_intersection / grounds_union if grounds_union > 0 else 0.0
             
             weights = {
-                'semantic': 0.45,
-                'section': 0.30,
+                'semantic': 0.40,
+                'section': 0.35,
                 'theme': 0.15,
                 'grounds': 0.10
             }

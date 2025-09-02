@@ -3,8 +3,3 @@ Flask-Cors
 python-dotenv
 pymongo
 google-generativeai
-numpy
-scikit-learn
-nltk
-setuptools
-sentence_transformers
