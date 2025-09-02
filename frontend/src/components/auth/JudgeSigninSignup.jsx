@@ -64,70 +64,35 @@ const JudgeSigninSignUp = () => {
     }
   };
 
-  const colors = {
-    background: darkMode ? "#0F172A" : "#F8FAFC",
-    text: darkMode ? "#F1F5F9" : "#0F172A",
-    muted: darkMode ? "#94A3B8" : "#64748B",
-    primary: darkMode ? "#818CF8" : "#6366F1",
-    secondary: darkMode ? "#EC4899" : "#EC4899",
-    glass: darkMode ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)",
-    border: darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        background: darkMode
-          ? "linear-gradient(135deg, #0F172A, #1E293B)"
-          : "linear-gradient(135deg, #F8FAFC, #E2E8F0)",
-        padding: "20px",
-      }}
+      className={`flex justify-center items-center min-h-screen p-5 ${
+        darkMode
+          ? "bg-gradient-to-br from-slate-900 to-slate-800"
+          : "bg-gradient-to-br from-slate-50 to-slate-200"
+      }`}
     >
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        style={{
-          background: colors.glass,
-          padding: "40px",
-          borderRadius: "24px",
-          backdropFilter: "blur(20px)",
-          boxShadow: darkMode
-            ? "0 8px 32px rgba(0, 0, 0, 0.2)"
-            : "0 8px 32px rgba(0, 0, 0, 0.1)",
-          width: "100%",
-          maxWidth: "400px",
-          textAlign: "center",
-          border: `1px solid ${colors.border}`,
-        }}
+        className={`w-full max-w-md p-10 rounded-3xl backdrop-blur-xl text-center border ${
+          darkMode
+            ? "bg-slate-900/50 shadow-2xl border-white/10"
+            : "bg-white/50 shadow-xl border-black/10"
+        }`}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginBottom: "20px",
-            position: "relative",
-          }}
-        >
+        <div className="flex justify-center items-center mb-5 relative">
           <motion.h2
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            style={{
-              color: colors.text,
-              fontSize: "24px",
-              fontWeight: "700",
-              textAlign: "center",
-              flex: 1,
-            }}
+            className={`text-2xl font-bold flex-1 ${
+              darkMode ? "text-slate-100" : "text-slate-900"
+            }`}
           >
             {isLogin ? "Login" : "Sign up"}
           </motion.h2>
@@ -135,16 +100,11 @@ const JudgeSigninSignUp = () => {
             onClick={() => setDarkMode(!darkMode)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            style={{
-              padding: "8px",
-              borderRadius: "8px",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: colors.text,
-              position: "absolute",
-              right: 0,
-            }}
+            className={`absolute right-0 p-2 rounded-lg hover:bg-opacity-20 transition-colors ${
+              darkMode
+                ? "text-slate-100 hover:bg-white"
+                : "text-slate-900 hover:bg-black"
+            }`}
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </motion.button>
@@ -154,7 +114,9 @@ const JudgeSigninSignUp = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          style={{ color: colors.muted, marginBottom: "20px", fontSize: "14px" }}
+          className={`mb-5 text-sm ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}
         >
           {isLogin ? "Login to continue" : "Create an account to continue"}
         </motion.p>
@@ -164,14 +126,9 @@ const JudgeSigninSignUp = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            style={{
-              backgroundColor: darkMode ? "#FFEBEE20" : "#FFEBEE",
-              color: "#C62828",
-              padding: "10px",
-              borderRadius: "8px",
-              marginBottom: "20px",
-              fontSize: "14px",
-            }}
+            className={`p-3 rounded-lg mb-5 text-sm text-red-700 ${
+              darkMode ? "bg-red-100/20" : "bg-red-50"
+            }`}
           >
             {error}
           </motion.div>
@@ -182,14 +139,9 @@ const JudgeSigninSignUp = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            style={{
-              backgroundColor: darkMode ? "#E8F5E920" : "#E8F5E9",
-              color: "#2E7D32",
-              padding: "10px",
-              borderRadius: "8px",
-              marginBottom: "20px",
-              fontSize: "14px",
-            }}
+            className={`p-3 rounded-lg mb-5 text-sm text-green-700 ${
+              darkMode ? "bg-green-100/20" : "bg-green-50"
+            }`}
           >
             {success}
           </motion.div>
@@ -202,51 +154,35 @@ const JudgeSigninSignUp = () => {
             transition={{ duration: 0.5, delay: 0.8 }}
           >
             {isLogin ? (
-              <>
-                <div style={{ position: "relative", marginBottom: "15px" }}>
-                  <Briefcase
-                    size={18}
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: colors.muted,
-                    }}
-                  />
-                  <input
-                    type="text"
-                    name="judgeIdOrUsername"
-                    value={formData.judgeIdOrUsername}
-                    placeholder="Judge ID or Username"
-                    required
-                    onChange={handleChange}
-                    style={{
-                      width: "calc(100% - 40px)",
-                      padding: "10px 10px 10px 35px",
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: "8px",
-                      outline: "none",
-                      fontSize: "14px",
-                      background: "none",
-                      color: colors.text,
-                      transition: "border-color 0.2s ease",
-                    }}
-                  />
-                </div>
-              </>
+              <div className="relative mb-4">
+                <Briefcase
+                  size={16}
+                  className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                    darkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
+                />
+                <input
+                  type="text"
+                  name="judgeIdOrUsername"
+                  value={formData.judgeIdOrUsername}
+                  placeholder="Judge ID or Username"
+                  required
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-3 py-3 rounded-lg text-sm border transition-all duration-200 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none ${
+                    darkMode
+                      ? "bg-transparent border-white/10 text-slate-100 placeholder-slate-400"
+                      : "bg-transparent border-black/10 text-slate-900 placeholder-slate-500"
+                  }`}
+                />
+              </div>
             ) : (
               <>
-                <div style={{ position: "relative", marginBottom: "15px" }}>
+                <div className="relative mb-4">
                   <User
-                    size={18}
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: colors.muted,
-                    }}
+                    size={16}
+                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                      darkMode ? "text-slate-400" : "text-slate-500"
+                    }`}
                   />
                   <input
                     type="text"
@@ -255,29 +191,19 @@ const JudgeSigninSignUp = () => {
                     placeholder="Full Name"
                     required
                     onChange={handleChange}
-                    style={{
-                      width: "calc(100% - 40px)",
-                      padding: "10px 10px 10px 35px",
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: "8px",
-                      outline: "none",
-                      fontSize: "14px",
-                      background: "none",
-                      color: colors.text,
-                      transition: "border-color 0.2s ease",
-                    }}
+                    className={`w-full pl-10 pr-3 py-3 rounded-lg text-sm border transition-all duration-200 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none ${
+                      darkMode
+                        ? "bg-transparent border-white/10 text-slate-100 placeholder-slate-400"
+                        : "bg-transparent border-black/10 text-slate-900 placeholder-slate-500"
+                    }`}
                   />
                 </div>
-                <div style={{ position: "relative", marginBottom: "15px" }}>
+                <div className="relative mb-4">
                   <Home
-                    size={18}
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: colors.muted,
-                    }}
+                    size={16}
+                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                      darkMode ? "text-slate-400" : "text-slate-500"
+                    }`}
                   />
                   <input
                     type="text"
@@ -286,29 +212,19 @@ const JudgeSigninSignUp = () => {
                     placeholder="Address"
                     required
                     onChange={handleChange}
-                    style={{
-                      width: "calc(100% - 40px)",
-                      padding: "10px 10px 10px 35px",
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: "8px",
-                      outline: "none",
-                      fontSize: "14px",
-                      background: "none",
-                      color: colors.text,
-                      transition: "border-color 0.2s ease",
-                    }}
+                    className={`w-full pl-10 pr-3 py-3 rounded-lg text-sm border transition-all duration-200 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none ${
+                      darkMode
+                        ? "bg-transparent border-white/10 text-slate-100 placeholder-slate-400"
+                        : "bg-transparent border-black/10 text-slate-900 placeholder-slate-500"
+                    }`}
                   />
                 </div>
-                <div style={{ position: "relative", marginBottom: "15px" }}>
+                <div className="relative mb-4">
                   <Mail
-                    size={18}
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: colors.muted,
-                    }}
+                    size={16}
+                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                      darkMode ? "text-slate-400" : "text-slate-500"
+                    }`}
                   />
                   <input
                     type="email"
@@ -317,29 +233,19 @@ const JudgeSigninSignUp = () => {
                     placeholder="Email"
                     required
                     onChange={handleChange}
-                    style={{
-                      width: "calc(100% - 40px)",
-                      padding: "10px 10px 10px 35px",
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: "8px",
-                      outline: "none",
-                      fontSize: "14px",
-                      background: "none",
-                      color: colors.text,
-                      transition: "border-color 0.2s ease",
-                    }}
+                    className={`w-full pl-10 pr-3 py-3 rounded-lg text-sm border transition-all duration-200 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none ${
+                      darkMode
+                        ? "bg-transparent border-white/10 text-slate-100 placeholder-slate-400"
+                        : "bg-transparent border-black/10 text-slate-900 placeholder-slate-500"
+                    }`}
                   />
                 </div>
-                <div style={{ position: "relative", marginBottom: "15px" }}>
+                <div className="relative mb-4">
                   <User
-                    size={18}
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: colors.muted,
-                    }}
+                    size={16}
+                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                      darkMode ? "text-slate-400" : "text-slate-500"
+                    }`}
                   />
                   <input
                     type="text"
@@ -348,29 +254,19 @@ const JudgeSigninSignUp = () => {
                     placeholder="Username"
                     required
                     onChange={handleChange}
-                    style={{
-                      width: "calc(100% - 40px)",
-                      padding: "10px 10px 10px 35px",
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: "8px",
-                      outline: "none",
-                      fontSize: "14px",
-                      background: "none",
-                      color: colors.text,
-                      transition: "border-color 0.2s ease",
-                    }}
+                    className={`w-full pl-10 pr-3 py-3 rounded-lg text-sm border transition-all duration-200 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none ${
+                      darkMode
+                        ? "bg-transparent border-white/10 text-slate-100 placeholder-slate-400"
+                        : "bg-transparent border-black/10 text-slate-900 placeholder-slate-500"
+                    }`}
                   />
                 </div>
-                <div style={{ position: "relative", marginBottom: "15px" }}>
+                <div className="relative mb-4">
                   <Briefcase
-                    size={18}
-                    style={{
-                      position: "absolute",
-                      left: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: colors.muted,
-                    }}
+                    size={16}
+                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                      darkMode ? "text-slate-400" : "text-slate-500"
+                    }`}
                   />
                   <input
                     type="number"
@@ -379,32 +275,22 @@ const JudgeSigninSignUp = () => {
                     placeholder="Judge ID"
                     required
                     onChange={handleChange}
-                    style={{
-                      width: "calc(100% - 40px)",
-                      padding: "10px 10px 10px 35px",
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: "8px",
-                      outline: "none",
-                      fontSize: "14px",
-                      background: "none",
-                      color: colors.text,
-                      transition: "border-color 0.2s ease",
-                    }}
+                    className={`w-full pl-10 pr-3 py-3 rounded-lg text-sm border transition-all duration-200 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none ${
+                      darkMode
+                        ? "bg-transparent border-white/10 text-slate-100 placeholder-slate-400"
+                        : "bg-transparent border-black/10 text-slate-900 placeholder-slate-500"
+                    }`}
                   />
                 </div>
               </>
             )}
 
-            <div style={{ position: "relative", marginBottom: "15px" }}>
+            <div className="relative mb-4">
               <Lock
-                size={18}
-                style={{
-                  position: "absolute",
-                  left: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: colors.muted,
-                }}
+                size={16}
+                className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+                  darkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               />
               <input
                 type="password"
@@ -413,17 +299,11 @@ const JudgeSigninSignUp = () => {
                 placeholder="Password"
                 required
                 onChange={handleChange}
-                style={{
-                  width: "calc(100% - 40px)",
-                  padding: "10px 10px 10px 35px",
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: "8px",
-                  outline: "none",
-                  fontSize: "14px",
-                  background: "none",
-                  color: colors.text,
-                  transition: "border-color 0.2s ease",
-                }}
+                className={`w-full pl-10 pr-3 py-3 rounded-lg text-sm border transition-all duration-200 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none ${
+                  darkMode
+                    ? "bg-transparent border-white/10 text-slate-100 placeholder-slate-400"
+                    : "bg-transparent border-black/10 text-slate-900 placeholder-slate-500"
+                }`}
               />
             </div>
           </motion.div>
@@ -434,22 +314,7 @@ const JudgeSigninSignUp = () => {
             transition={{ duration: 0.5, delay: 1.0 }}
             type="submit"
             disabled={isLoading}
-            style={{
-              width: "100%",
-              padding: "12px",
-              background: "#8B5CF6",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "600",
-              marginTop: "10px",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-              boxShadow: darkMode
-                ? "0 4px 6px rgba(0, 0, 0, 0.2)"
-                : "0 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
+            className="w-full py-3 px-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mt-3"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -461,18 +326,17 @@ const JudgeSigninSignUp = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.1 }}
-          style={{ marginTop: "20px", fontSize: "14px", color: colors.muted }}
+          className={`mt-5 text-sm ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}
         >
           <p>
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <span
               onClick={() => setIsLogin(!isLogin)}
-              style={{
-                color: colors.primary,
-                cursor: "pointer",
-                fontWeight: "600",
-                textDecoration: "underline",
-              }}
+              className={`font-semibold underline cursor-pointer hover:opacity-80 transition-opacity ${
+                darkMode ? "text-indigo-400" : "text-indigo-600"
+              }`}
             >
               {isLogin ? "Sign up" : "Login"}
             </span>

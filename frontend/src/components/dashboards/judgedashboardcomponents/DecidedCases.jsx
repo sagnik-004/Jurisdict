@@ -1,14 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { axiosInstance } from "../../../lib/axios.js";
 import Case from "./Case.jsx";
 
-const DecidedCases = ({ decidedCases }) => {
+const DecidedCases = () => {
   const [activeTab, setActiveTab] = useState("granted");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCase, setExpandedCase] = useState(null);
+  const [cases, setCases] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const grantedCases = decidedCases.filter((c) => c.bailStatus === "Accepted");
-  const declinedCases = decidedCases.filter((c) => c.bailStatus === "Declined");
+  useEffect(() => {
+    fetchDecidedCases();
+  }, []);
+
+  const fetchDecidedCases = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && user.judgeId) {
+        const response = await axiosInstance.get(`/judge/${user.judgeId}/ongoing-cases`);
+        const decidedCases = response.data.cases.filter(caseItem => 
+          caseItem.bailStatus === "Accepted" || caseItem.bailStatus === "Declined"
+        );
+        setCases(decidedCases);
+      }
+    } catch (error) {
+      setCases([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const grantedCases = cases.filter((c) => c.bailStatus === "Accepted");
+  const declinedCases = cases.filter((c) => c.bailStatus === "Declined");
 
   const toggleCase = (caseId) =>
     setExpandedCase(expandedCase === caseId ? null : caseId);
@@ -38,6 +62,17 @@ const DecidedCases = ({ decidedCases }) => {
       )}
     </div>
   );
+
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 md:p-8">
+        <div className="flex justify-center items-center mt-8">
+          <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-indigo-500"></div>
+          <p className="ml-4 text-gray-600 dark:text-gray-400">Loading cases...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8">

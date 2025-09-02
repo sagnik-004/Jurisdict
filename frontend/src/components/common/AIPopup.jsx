@@ -7,6 +7,22 @@ const AIPopup = ({ isOpen, onClose, data, isLoading, error }) => {
     setExpandedCase(expandedCase === caseId ? null : caseId);
   };
 
+  const renderMarkdown = (text) => {
+    if (!text) return "";
+    
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code class="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-sm">$1</code>')
+      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 mt-4">$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-4">$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 mt-4">$1</h1>')
+      .replace(/^\- (.*$)/gim, '<li class="ml-4">• $1</li>')
+      .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal">$1</li>')
+      .replace(/\n\n/g, '</p><p class="mb-3">')
+      .replace(/\n/g, '<br>');
+  };
+
   if (!isOpen) return null;
 
   const aiRecommendation = data?.aiAssistance;
@@ -95,9 +111,12 @@ const AIPopup = ({ isOpen, onClose, data, isLoading, error }) => {
                     AI Recommendation
                   </h3>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed pl-11">
-                  {aiRecommendation || "No recommendation available."}
-                </p>
+                <div 
+                  className="text-gray-700 dark:text-gray-300 leading-relaxed pl-11 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ 
+                    __html: `<p class="mb-3">${renderMarkdown(aiRecommendation || "No recommendation available.")}</p>` 
+                  }}
+                />
               </div>
 
               <div className="p-6">
@@ -187,11 +206,12 @@ const AIPopup = ({ isOpen, onClose, data, isLoading, error }) => {
                                       Case Summary
                                     </h5>
                                   </div>
-                                  <div className="pl-9">
-                                    <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                                      {caseItem.caseSummary}
-                                    </p>
-                                  </div>
+                                  <div 
+                                    className="pl-9 prose prose-sm max-w-none"
+                                    dangerouslySetInnerHTML={{ 
+                                      __html: `<p class="mb-3">${renderMarkdown(caseItem.caseSummary)}</p>` 
+                                    }}
+                                  />
                                 </div>
                               </div>
                             </div>

@@ -1,10 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { axiosInstance } from "../../../lib/axios.js";
 import Case from "./Case.jsx";
 
-const UnraisedBails = ({ cases }) => {
+const UnraisedBails = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCase, setExpandedCase] = useState(null);
+  const [cases, setCases] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOngoingCases();
+  }, []);
+
+  const fetchOngoingCases = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && user.judgeId) {
+        const response = await axiosInstance.get(`/judge/${user.judgeId}/ongoing-cases`);
+        const filteredCases = response.data.cases.filter(caseItem => caseItem.bailStatus === "");
+        setCases(filteredCases);
+      }
+    } catch (error) {
+      setCases([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -17,6 +39,17 @@ const UnraisedBails = ({ cases }) => {
   const filteredCases = cases.filter((c) =>
     c.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 md:p-8">
+        <div className="flex justify-center items-center mt-8">
+          <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-indigo-500"></div>
+          <p className="ml-4 text-gray-600 dark:text-gray-400">Loading cases...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8">

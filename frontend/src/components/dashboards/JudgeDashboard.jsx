@@ -14,9 +14,6 @@ const JudgeDashboard = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [cases, setCases] = useState([]);
-  const [bailAppeals, setBailAppeals] = useState([]);
-  const [decidedCases, setDecidedCases] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,29 +26,10 @@ const JudgeDashboard = () => {
     const loggedInUser = JSON.parse(localStorage.getItem("user"));
     if (loggedInUser) {
       setUser(loggedInUser);
-      fetchData(loggedInUser.username);
     } else {
       navigate("/landing");
     }
   }, [navigate]);
-
-  const fetchData = (username) => {
-    axiosInstance
-      .get(`/judge/cases/${username}`)
-      .then((res) => setCases(res.data));
-    axiosInstance
-      .get(`/judge/bail-appeals/${username}`)
-      .then((res) => setBailAppeals(res.data));
-    axiosInstance
-      .get(`/judge/decided-cases/${username}`)
-      .then((res) => setDecidedCases(res.data));
-  };
-
-  const onBailDecisionUpdate = () => {
-    if (user && user.username) {
-      fetchData(user.username);
-    }
-  };
 
   const toggleMode = () =>
     setMode((prev) => (prev === "light" ? "dark" : "light"));
@@ -73,20 +51,15 @@ const JudgeDashboard = () => {
   const renderContent = () => {
     switch (selectedItem) {
       case "Unraised Bails":
-        return <UnraisedBails cases={cases} />;
+        return <UnraisedBails />;
       case "Pending Decisions":
-        return (
-          <PendingDecisions
-            bailAppeals={bailAppeals}
-            onUpdate={onBailDecisionUpdate}
-          />
-        );
+        return <PendingDecisions />;
       case "Decided Cases":
-        return <DecidedCases decidedCases={decidedCases} />;
+        return <DecidedCases />;
       case "FAQs":
         return <FAQ />;
       default:
-        return <UnraisedBails cases={cases} />;
+        return <UnraisedBails />;
     }
   };
 
