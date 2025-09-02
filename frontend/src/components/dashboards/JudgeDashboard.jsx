@@ -47,7 +47,11 @@ const JudgeDashboard = () => {
       .then((res) => setDecidedCases(res.data));
   };
 
-  const onBailDecisionUpdate = () => fetchData(user.username);
+  const onBailDecisionUpdate = () => {
+    if (user && user.username) {
+      fetchData(user.username);
+    }
+  };
 
   const toggleMode = () =>
     setMode((prev) => (prev === "light" ? "dark" : "light"));

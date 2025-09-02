@@ -1,76 +1,6 @@
 import React, { useState } from "react";
 import { Search } from "lucide-react";
-
-const DecidedCaseCard = ({ caseItem, expandedCase, onToggle }) => {
-  const isExpanded = expandedCase === caseItem._id;
-
-  return (
-    <div className="mb-4">
-      <div
-        className={`bg-white dark:bg-gray-800 border-l-4 ${
-          caseItem.bailStatus === "Accepted"
-            ? "border-green-500"
-            : "border-red-500"
-        } border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all duration-300 overflow-hidden`}
-        onClick={() => onToggle(caseItem._id)}
-      >
-        <div className="p-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {caseItem.caseTitle}
-            </h3>
-            <div
-              className={`transform transition-transform duration-300 ${
-                isExpanded ? "rotate-180" : ""
-              }`}
-            >
-              <svg
-                className="w-6 h-6 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-        {isExpanded && (
-          <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 p-6 space-y-4">
-            <p>
-              <span className="font-semibold">Case ID:</span> {caseItem.caseId}
-            </p>
-            <p>
-              <span className="font-semibold">Filing Date:</span>{" "}
-              {new Date(caseItem.filingDate).toLocaleDateString()}
-            </p>
-            <p>
-              <span className="font-semibold">Status:</span>{" "}
-              <span
-                className={
-                  caseItem.bailStatus === "Accepted"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }
-              >
-                {caseItem.bailStatus}
-              </span>
-            </p>
-            <p>
-              <span className="font-semibold">Judge's Comments:</span>{" "}
-              {caseItem.judgeComments?.join(", ") || "N/A"}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+import Case from "./Case.jsx";
 
 const DecidedCases = ({ decidedCases }) => {
   const [activeTab, setActiveTab] = useState("granted");
@@ -94,7 +24,7 @@ const DecidedCases = ({ decidedCases }) => {
     <div className="space-y-4">
       {cases.length > 0 ? (
         filterCases(cases).map((c) => (
-          <DecidedCaseCard
+          <Case
             key={c._id}
             caseItem={c}
             expandedCase={expandedCase}

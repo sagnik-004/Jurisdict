@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  AddCircleOutline,
-  Assignment,
-  TrackChanges,
-  HelpOutline,
-  Balance,
-  Logout,
-} from "@mui/icons-material";
+import { Gavel, Scale, FileText, HelpCircle, LogOut } from "lucide-react";
+import { Balance } from "@mui/icons-material";
 
 const Sidebar = ({
   user,
@@ -16,7 +10,7 @@ const Sidebar = ({
   handleLogout,
 }) => {
   const getInitials = (name) => {
-    if (!name) return "";
+    if (!name) return "JD";
     const nameParts = name.split(" ");
     const firstName = nameParts[0] || "";
     const lastName =
@@ -25,11 +19,10 @@ const Sidebar = ({
   };
 
   const menuItems = [
-    { text: "Add Case", icon: <AddCircleOutline /> },
-    { text: "Ongoing Cases", icon: <Assignment /> },
-    { text: "Track Bail Status", icon: <TrackChanges /> },
-    { text: "Decided Cases", icon: <Balance /> },
-    { text: "FAQs", icon: <HelpOutline /> },
+    { text: "Unraised Bails", icon: <Gavel size={20} /> },
+    { text: "Pending Decisions", icon: <Scale size={20} /> },
+    { text: "Decided Cases", icon: <FileText size={20} /> },
+    { text: "FAQs", icon: <HelpCircle size={20} /> },
   ];
 
   return (
@@ -62,19 +55,19 @@ const Sidebar = ({
         </ul>
       </div>
 
-      <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg overflow-hidden">
-        <div className="w-12 h-12 min-w-12 min-h-12 bg-orange-500 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white aspect-square">
+      <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
+        <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white">
           {getInitials(user?.name)}
         </div>
-        <div className="flex-grow min-w-0">
+        <div className="flex-grow">
           <p className="font-bold">{user?.name}</p>
           <p className="text-sm text-gray-400">@{user?.username}</p>
         </div>
         <button
           onClick={handleLogout}
-          className="p-2 rounded-full hover:bg-gray-700 transition-colors duration-200 flex-shrink-0"
+          className="p-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
         >
-          <Logout />
+          <LogOut size={20} />
         </button>
       </div>
     </div>
