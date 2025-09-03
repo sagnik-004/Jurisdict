@@ -7,10 +7,11 @@ def generate_ai_assistance(bail_decision_data, entity):
     if not api_key:
         return "Error: GEMINI_API_KEY not found in environment variables."
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
     
     headers = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-goog-api-key': api_key
     }
 
     decision = bail_decision_data.get('decision', 'N/A')
@@ -37,7 +38,6 @@ def generate_ai_assistance(bail_decision_data, entity):
             vague_summary = "leaning favorably, though subject to judicial review."
         elif decision == "Deny Bail":
             vague_summary = "presenting significant challenges."
-
         if entity == 'lawyer':
             prompt = (
                 "Generate a brief, high-level professional summary for a lawyer. "
@@ -54,6 +54,7 @@ def generate_ai_assistance(bail_decision_data, entity):
     payload = {
         "contents": [
             {
+                "role": "user",
                 "parts": [
                     {
                         "text": prompt
