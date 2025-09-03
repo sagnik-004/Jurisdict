@@ -54,7 +54,6 @@ def generate_ai_assistance(bail_decision_data, entity):
     payload = {
         "contents": [
             {
-                "role": "user",
                 "parts": [
                     {
                         "text": prompt
