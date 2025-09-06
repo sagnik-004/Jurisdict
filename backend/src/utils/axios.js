@@ -7,7 +7,7 @@ const ENV = process.env.ENV
 
 const baseURL = ENV === "development"
     ? "http://127.0.0.1:5001"
-    : "https://jurisdict-8nns.onrender.com";
+    : "https://jurisdict-yu4x.onrender.com";
 
 export const axiosInstance = axios.create({
     baseURL,
