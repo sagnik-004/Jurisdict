@@ -154,27 +154,73 @@ export const getCaseProcessed = async (req, res) => {
     const payload = {
       ...req.body,
       entity,
+      caseId: caseDetails.caseId,
       caseSummary: caseDetails.caseSummary,
       groundsOfBail: caseDetails.groundsOfBail,
       judgeComments: caseDetails.judgeComments,
       caseTitle: caseDetails.caseTitle,
       bnsSections: caseDetails.bnsSections,
-      casePoints: caseDetails.casePoints,
+      casePoints: (() => {
+        if (!caseDetails.casePoints) return {};
+        if (typeof caseDetails.casePoints === 'object' && !(caseDetails.casePoints instanceof Map)) {
+          return caseDetails.casePoints;
+        }
+        const obj = {};
+        try {
+          if (typeof caseDetails.casePoints.toObject === 'function') {
+            const converted = caseDetails.casePoints.toObject();
+            for (const [k, v] of Object.entries(converted)) obj[k] = v;
+            return obj;
+          }
+        } catch (e) {}
+        try {
+          for (const [k, v] of caseDetails.casePoints) {
+            obj[k] = v;
+          }
+          return obj;
+        } catch (e) {
+          return {};
+        }
+      })(),
     };
 
     const response = await axiosInstance.post('/find-similar-cases', payload);
 
-    const { aiAssistance, bailDecision, similarCases } = response.data;
+    const aiAssistance = response?.data?.aiAssistance ?? null;
+    const bailDecision = response?.data?.bailDecision ?? null;
+    const similarCases = Array.isArray(response?.data?.similarCases) ? response.data.similarCases : [];
 
-    const similarCaseIds = similarCases.map(c => c.caseId);
+    if (!similarCases.length) {
+      return res.status(200).json({
+        aiAssistance,
+        bailDecision,
+        currentCase: caseDetails,
+        similarCases: []
+      });
+    }
+
+    const similarCaseIds = similarCases.map(c => c.caseId).filter(Boolean);
     const similarCaseDetails = await Case.find({ caseId: { $in: similarCaseIds } });
 
     const enrichedSimilarCases = similarCases.map(sc => {
       const details = similarCaseDetails.find(cd => cd.caseId === sc.caseId);
-      return {
-        similarityPercentage: sc.similarityPercentage,
-        ...details.toObject()
-      };
+      if (details) {
+        const detailsObj = typeof details.toObject === 'function' ? details.toObject() : { ...details };
+        return {
+          similarityPercentage: sc.similarityPercentage,
+          ...detailsObj
+        };
+      } else {
+        return {
+          caseId: sc.caseId,
+          caseTitle: sc.caseTitle || "Unavailable",
+          caseSummary: sc.caseSummary || "",
+          bnsSections: sc.bnsSections || [],
+          groundsOfBail: sc.groundsOfBail || [],
+          bailStatus: sc.bailStatus || "",
+          similarityPercentage: sc.similarityPercentage
+        };
+      }
     });
 
     res.status(200).json({
@@ -184,6 +230,7 @@ export const getCaseProcessed = async (req, res) => {
       similarCases: enrichedSimilarCases
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Error processing case', error: error.message });
   }
 };
