@@ -1,55 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
-import { axiosInstance } from "../../../lib/axios.js";
 import Case from "./Case.jsx";
+import { axiosInstance } from "../../../lib/axios.js";
 
 const UnraisedBails = () => {
+  const [bailAppeals, setBailAppeals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCase, setExpandedCase] = useState(null);
-  const [cases, setCases] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchOngoingCases();
-  }, []);
 
   const fetchOngoingCases = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      if (user && user.judgeId) {
-        const response = await axiosInstance.get(`/judge/${user.judgeId}/ongoing-cases`);
-        const filteredCases = response.data.cases.filter(caseItem => caseItem.bailStatus === "");
-        setCases(filteredCases);
+      if (!user?.judgeId) {
+        throw new Error("Judge ID not found in local storage.");
       }
-    } catch (error) {
-      setCases([]);
+      const response = await axiosInstance.get(
+        `/judge/${user.judgeId}/ongoing-cases`
+      );
+      if (response.data && Array.isArray(response.data.cases)) {
+        const unraisedCases = response.data.cases.filter(
+          (c) => c.bailStatus === ""
+        );
+        setBailAppeals(unraisedCases);
+      }
+    } catch (err) {
+      console.error("Error fetching unraised bail cases:", err);
+      setError("Failed to fetch unraised bail cases. Please try again later.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
+  useEffect(() => {
+    fetchOngoingCases();
+  }, []);
 
   const toggleCase = (caseId) => {
     setExpandedCase(expandedCase === caseId ? null : caseId);
   };
 
-  const filteredCases = cases.filter((c) =>
+  const filteredCases = bailAppeals.filter((c) =>
     c.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  if (isLoading) {
-    return (
-      <div className="p-4 sm:p-6 md:p-8">
-        <div className="flex justify-center items-center mt-8">
-          <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-indigo-500"></div>
-          <p className="ml-4 text-gray-600 dark:text-gray-400">Loading cases...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
@@ -62,29 +58,43 @@ const UnraisedBails = () => {
             type="text"
             placeholder="Search by case title..."
             value={searchQuery}
-            onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="text-gray-400" size={20} />
           </div>
         </div>
       </div>
-      <div className="space-y-4">
-        {filteredCases.length > 0 ? (
-          filteredCases.map((caseItem) => (
-            <Case
-              key={caseItem._id}
-              caseItem={caseItem}
-              expandedCase={expandedCase}
-              onToggle={toggleCase}
-            />
-          ))
-        ) : (
-          <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
-            No unraised bails found.
-          </p>
-        )}
+
+      <div className="mt-6">
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="flex justify-center items-center mt-8">
+              <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+              <p className="ml-4 text-orange-600 dark:text-orange-400">
+                Loading...
+              </p>
+            </div>
+          ) : error ? (
+            <p className="text-center text-red-500 dark:text-red-400">
+              {error}
+            </p>
+          ) : filteredCases.length > 0 ? (
+            filteredCases.map((caseItem) => (
+              <Case
+                key={caseItem._id}
+                caseItem={caseItem}
+                expandedCase={expandedCase}
+                onToggle={toggleCase}
+              />
+            ))
+          ) : (
+            <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
+              No unraised bail cases found.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

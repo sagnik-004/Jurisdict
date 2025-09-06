@@ -2,31 +2,24 @@ import React, { useState } from "react";
 import { Search } from "@mui/icons-material";
 import Case from "./Case";
 
-const OngoingCases = () => {
-  const [activeTab, setActiveTab] = useState("registered");
-  const [expandedCase, setExpandedCase] = useState(null);
+const DecidedCases = () => {
+  const [activeTab, setActiveTab] = useState("granted");
+  const [expandedCaseId, setExpandedCaseId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [registeredCases, setRegisteredCases] = useState([]);
-  const [appeals, setAppeals] = useState([]);
+  const [allCases, setAllCases] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const toggleCaseDescription = (caseId) => {
-    setExpandedCase((prev) => (prev === caseId ? null : caseId));
+  const grantedCases = allCases.filter((c) => c.bailStatus === "Accepted");
+  const declinedCases = allCases.filter((c) => c.bailStatus === "Declined");
+
+  const toggleExpand = (caseId) => {
+    setExpandedCaseId((prev) => (prev === caseId ? null : caseId));
   };
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
-  const filteredCases = (cases) =>
-    cases.filter((caseItem) =>
-      caseItem.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-  const renderCaseList = (cases, type) => {
-    const caseList = filteredCases(cases);
-
+  const renderCaseList = (cases) => {
     if (loading) {
       return (
         <div className="flex justify-center items-center mt-8">
@@ -37,27 +30,24 @@ const OngoingCases = () => {
         </div>
       );
     }
-
     if (error) {
-      return <p className="text-center text-red-500 mt-8">Error: {error}</p>;
+      return <p className="text-center text-red-500 mt-8">{error}</p>;
     }
-
-    if (caseList.length === 0) {
+    if (cases.length === 0) {
       return (
         <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
-          No {type} cases found.
+          No cases to display in this category.
         </p>
       );
     }
-
     return (
       <div className="space-y-4">
-        {caseList.map((caseItem) => (
+        {cases.map((caseItem) => (
           <Case
             key={caseItem._id}
             caseItem={caseItem}
-            expandedCase={expandedCase}
-            onToggle={toggleCaseDescription}
+            expandedCase={expandedCaseId}
+            onToggle={toggleExpand}
           />
         ))}
       </div>
@@ -68,12 +58,12 @@ const OngoingCases = () => {
     <div className="p-4 sm:p-6 md:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Ongoing Cases
+          Decided Cases
         </h2>
         <div className="relative w-full sm:w-72">
           <input
             type="text"
-            placeholder="Search by case title..."
+            placeholder="Search decided cases..."
             value={searchQuery}
             onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -87,35 +77,33 @@ const OngoingCases = () => {
       <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           <button
-            onClick={() => setActiveTab("registered")}
+            onClick={() => setActiveTab("granted")}
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === "registered"
+              activeTab === "granted"
                 ? "border-indigo-500 text-indigo-600"
                 : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500"
             }`}
           >
-            Registered Cases
+            Bail Accepted
           </button>
           <button
-            onClick={() => setActiveTab("appeals")}
+            onClick={() => setActiveTab("declined")}
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === "appeals"
+              activeTab === "declined"
                 ? "border-indigo-500 text-indigo-600"
                 : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500"
             }`}
           >
-            Appeals from Detainee
+            Bail Declined
           </button>
         </nav>
       </div>
-
       <div className="mt-6">
-        {activeTab === "registered" &&
-          renderCaseList(registeredCases, "registered")}
-        {activeTab === "appeals" && renderCaseList(appeals, "appeals")}
+        {activeTab === "granted" && renderCaseList(grantedCases)}
+        {activeTab === "declined" && renderCaseList(declinedCases)}
       </div>
     </div>
   );
 };
 
-export default OngoingCases;
+export default DecidedCases;

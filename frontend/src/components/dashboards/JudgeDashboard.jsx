@@ -14,6 +14,12 @@ const JudgeDashboard = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [dashboardStats, setDashboardStats] = useState({
+    pendingDecisions: 0,
+    unraisedBails: 0,
+    decidedCases: 0,
+    totalCases: 0,
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,10 +32,38 @@ const JudgeDashboard = () => {
     const loggedInUser = JSON.parse(localStorage.getItem("user"));
     if (loggedInUser) {
       setUser(loggedInUser);
+      fetchDashboardStats(loggedInUser.judgeId);
     } else {
       navigate("/landing");
     }
   }, [navigate]);
+
+  const fetchDashboardStats = async (judgeId) => {
+    try {
+      const response = await axiosInstance.get(
+        `/judge/${judgeId}/ongoing-cases`
+      );
+      if (response.data && Array.isArray(response.data.cases)) {
+        const cases = response.data.cases;
+        const pending = cases.filter(
+          (c) => c.bailStatus === "Pending to judge"
+        ).length;
+        const unraised = cases.filter((c) => c.bailStatus === "").length;
+        const decided = cases.filter(
+          (c) => c.bailStatus === "Accepted" || c.bailStatus === "Declined"
+        ).length;
+
+        setDashboardStats({
+          pendingDecisions: pending,
+          unraisedBails: unraised,
+          decidedCases: decided,
+          totalCases: cases.length,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    }
+  };
 
   const toggleMode = () =>
     setMode((prev) => (prev === "light" ? "dark" : "light"));
@@ -85,10 +119,10 @@ const JudgeDashboard = () => {
           isSidebarVisible ? "ml-72" : "ml-0"
         }`}
       >
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-4">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
           <button
             onClick={toggleMode}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="p-2 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 shadow-lg border border-gray-200 dark:border-gray-700"
           >
             {mode === "light" ? <Moon size={20} /> : <Sun size={20} />}
           </button>
@@ -96,14 +130,20 @@ const JudgeDashboard = () => {
 
         <button
           onClick={toggleSidebar}
-          className={`fixed top-4 bg-gray-800 text-white p-2 rounded-full z-50 transition-all duration-300 ${
+          className={`fixed top-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 p-2 rounded-full z-50 transition-all duration-300 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 ${
             isSidebarVisible ? "left-72" : "left-4"
           }`}
         >
           {isSidebarVisible ? <ChevronLeft size={24} /> : <Menu size={24} />}
         </button>
 
-        <div className="pt-16 px-4 sm:px-6 md:px-8">{renderContent()}</div>
+        <div
+          className={
+            selectedItem === "FAQs" ? "" : "pt-16 px-4 sm:px-6 md:px-8"
+          }
+        >
+          {renderContent()}
+        </div>
       </main>
     </div>
   );

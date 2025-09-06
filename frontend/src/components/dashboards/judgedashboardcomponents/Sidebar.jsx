@@ -1,5 +1,12 @@
 import React from "react";
-import { Gavel, Scale, FileText, HelpCircle, LogOut } from "lucide-react";
+import {
+  Gavel,
+  Scale,
+  FileText,
+  HelpCircle,
+  LogOut,
+  BarChart3,
+} from "lucide-react";
 import { Balance } from "@mui/icons-material";
 
 const Sidebar = ({
@@ -19,15 +26,24 @@ const Sidebar = ({
   };
 
   const menuItems = [
-    { text: "Unraised Bails", icon: <Gavel size={20} /> },
-    { text: "Pending Decisions", icon: <Scale size={20} /> },
-    { text: "Decided Cases", icon: <FileText size={20} /> },
+    {
+      text: "Unraised Bails",
+      icon: <Gavel size={20} />,
+    },
+    {
+      text: "Pending Decisions",
+      icon: <Scale size={20} />,
+    },
+    {
+      text: "Decided Cases",
+      icon: <FileText size={20} />,
+    },
     { text: "FAQs", icon: <HelpCircle size={20} /> },
   ];
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen bg-gray-900 text-white flex flex-col justify-between shadow-lg transition-all duration-300 z-50 ${
+      className={`fixed top-0 left-0 h-screen bg-gray-900 text-white flex flex-col justify-between shadow-2xl transition-all duration-300 z-50 border-r border-gray-800 ${
         isSidebarVisible ? "w-72 p-6" : "w-0 p-0 overflow-hidden"
       }`}
     >
@@ -42,33 +58,38 @@ const Sidebar = ({
             <li
               key={item.text}
               onClick={() => setSelectedItem(item.text)}
-              className={`flex items-center gap-4 p-3 rounded-lg mb-2 cursor-pointer transition-colors duration-200 ${
+              className={`flex items-center justify-between p-3 rounded-lg mb-2 cursor-pointer transition-colors duration-200 ${
                 selectedItem === item.text
                   ? "bg-white text-gray-900"
                   : "hover:bg-gray-800"
               }`}
             >
-              {item.icon}
-              <span>{item.text}</span>
+              <div className="flex items-center gap-4">
+                {item.icon}
+                <span>{item.text}</span>
+              </div>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
-        <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white">
-          {getInitials(user?.name)}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
+          <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white aspect-square shrink-0">
+            {getInitials(user?.name)}
+          </div>
+          <div className="flex-grow">
+            <p className="font-bold">{user?.name}</p>
+            <p className="text-sm text-gray-400">@{user?.username}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
+            title="Logout"
+          >
+            <LogOut size={20} />
+          </button>
         </div>
-        <div className="flex-grow">
-          <p className="font-bold">{user?.name}</p>
-          <p className="text-sm text-gray-400">@{user?.username}</p>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="p-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
-        >
-          <LogOut size={20} />
-        </button>
       </div>
     </div>
   );

@@ -111,7 +111,13 @@ const LawyerDashboard = () => {
           {isSidebarVisible ? <ChevronLeft /> : <Menu />}
         </button>
 
-        <div className="pt-16 px-4 sm:px-6 md:px-8">{renderContent()}</div>
+        <div
+          className={
+            selectedItem === "FAQs" ? "" : "pt-16 px-4 sm:px-6 md:px-8"
+          }
+        >
+          {renderContent()}
+        </div>
       </main>
     </div>
   );

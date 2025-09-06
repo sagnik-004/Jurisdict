@@ -18,9 +18,13 @@ const DecidedCases = () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       if (user && user.judgeId) {
-        const response = await axiosInstance.get(`/judge/${user.judgeId}/ongoing-cases`);
-        const decidedCases = response.data.cases.filter(caseItem => 
-          caseItem.bailStatus === "Accepted" || caseItem.bailStatus === "Declined"
+        const response = await axiosInstance.get(
+          `/judge/${user.judgeId}/ongoing-cases`
+        );
+        const decidedCases = response.data.cases.filter(
+          (caseItem) =>
+            caseItem.bailStatus === "Accepted" ||
+            caseItem.bailStatus === "Declined"
         );
         setCases(decidedCases);
       }
@@ -66,9 +70,14 @@ const DecidedCases = () => {
   if (isLoading) {
     return (
       <div className="p-4 sm:p-6 md:p-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Decided Cases
+        </h2>
         <div className="flex justify-center items-center mt-8">
-          <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-indigo-500"></div>
-          <p className="ml-4 text-gray-600 dark:text-gray-400">Loading cases...</p>
+          <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+          <p className="ml-4 text-orange-600 dark:text-orange-400">
+            Loading...
+          </p>
         </div>
       </div>
     );
@@ -86,7 +95,7 @@ const DecidedCases = () => {
             placeholder="Search by case title..."
             value={searchQuery}
             onChange={handleSearch}
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="text-gray-400" size={20} />
@@ -100,7 +109,7 @@ const DecidedCases = () => {
             onClick={() => setActiveTab("granted")}
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === "granted"
-                ? "border-indigo-500 text-indigo-600"
+                ? "border-green-500 text-green-600 dark:text-green-400"
                 : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
             }`}
           >
@@ -110,7 +119,7 @@ const DecidedCases = () => {
             onClick={() => setActiveTab("declined")}
             className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === "declined"
-                ? "border-indigo-500 text-indigo-600"
+                ? "border-red-500 text-red-600 dark:text-red-400"
                 : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
             }`}
           >
