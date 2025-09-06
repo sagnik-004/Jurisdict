@@ -137,7 +137,6 @@ export const caseRegister = async (req, res) => {
         res.status(201).json({ message: "Case registered successfully", case: newCase });
 
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
@@ -160,68 +159,34 @@ export const getCaseProcessed = async (req, res) => {
       judgeComments: caseDetails.judgeComments,
       caseTitle: caseDetails.caseTitle,
       bnsSections: caseDetails.bnsSections,
-      casePoints: (() => {
-        if (!caseDetails.casePoints) return {};
-        if (typeof caseDetails.casePoints === 'object' && !(caseDetails.casePoints instanceof Map)) {
-          return caseDetails.casePoints;
-        }
-        const obj = {};
-        try {
-          if (typeof caseDetails.casePoints.toObject === 'function') {
-            const converted = caseDetails.casePoints.toObject();
-            for (const [k, v] of Object.entries(converted)) obj[k] = v;
-            return obj;
-          }
-        } catch (e) {}
-        try {
-          for (const [k, v] of caseDetails.casePoints) {
-            obj[k] = v;
-          }
-          return obj;
-        } catch (e) {
-          return {};
-        }
-      })(),
+      casePoints: caseDetails.casePoints ? Object.fromEntries(caseDetails.casePoints) : {},
     };
 
+    console.log("Sending payload to ML backend:", JSON.stringify(payload, null, 2));
+
     const response = await axiosInstance.post('/find-similar-cases', payload);
+
+    console.log("Raw response from ML backend:", JSON.stringify(response.data, null, 2));
 
     const aiAssistance = response?.data?.aiAssistance ?? null;
     const bailDecision = response?.data?.bailDecision ?? null;
     const similarCases = Array.isArray(response?.data?.similarCases) ? response.data.similarCases : [];
 
-    if (!similarCases.length) {
-      return res.status(200).json({
-        aiAssistance,
-        bailDecision,
-        currentCase: caseDetails,
-        similarCases: []
+    console.log("Similar cases returned by ML:", similarCases);
+
+    let enrichedSimilarCases = [];
+    if (similarCases.length) {
+      const similarCaseIds = similarCases.map(c => c.caseId).filter(Boolean);
+      console.log("Looking up caseIds in Mongo:", similarCaseIds);
+      const similarCaseDetails = await Case.find({ caseId: { $in: similarCaseIds } });
+      console.log("Mongo returned cases:", similarCaseDetails.length);
+      enrichedSimilarCases = similarCases.map(sc => {
+        const details = similarCaseDetails.find(cd => cd.caseId === sc.caseId);
+        return details
+          ? { similarityPercentage: sc.similarityPercentage, ...details.toObject() }
+          : { ...sc };
       });
     }
-
-    const similarCaseIds = similarCases.map(c => c.caseId).filter(Boolean);
-    const similarCaseDetails = await Case.find({ caseId: { $in: similarCaseIds } });
-
-    const enrichedSimilarCases = similarCases.map(sc => {
-      const details = similarCaseDetails.find(cd => cd.caseId === sc.caseId);
-      if (details) {
-        const detailsObj = typeof details.toObject === 'function' ? details.toObject() : { ...details };
-        return {
-          similarityPercentage: sc.similarityPercentage,
-          ...detailsObj
-        };
-      } else {
-        return {
-          caseId: sc.caseId,
-          caseTitle: sc.caseTitle || "Unavailable",
-          caseSummary: sc.caseSummary || "",
-          bnsSections: sc.bnsSections || [],
-          groundsOfBail: sc.groundsOfBail || [],
-          bailStatus: sc.bailStatus || "",
-          similarityPercentage: sc.similarityPercentage
-        };
-      }
-    });
 
     res.status(200).json({
       aiAssistance,
@@ -230,7 +195,7 @@ export const getCaseProcessed = async (req, res) => {
       similarCases: enrichedSimilarCases
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in getCaseProcessed:", error);
     res.status(500).json({ message: 'Error processing case', error: error.message });
   }
 };
