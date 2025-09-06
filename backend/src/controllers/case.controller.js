@@ -162,24 +162,19 @@ export const getCaseProcessed = async (req, res) => {
       casePoints: caseDetails.casePoints ? Object.fromEntries(caseDetails.casePoints) : {},
     };
 
-    console.log("Sending payload to ML backend:", JSON.stringify(payload, null, 2));
 
     const response = await axiosInstance.post('/find-similar-cases', payload);
 
-    console.log("Raw response from ML backend:", JSON.stringify(response.data, null, 2));
 
     const aiAssistance = response?.data?.aiAssistance ?? null;
     const bailDecision = response?.data?.bailDecision ?? null;
     const similarCases = Array.isArray(response?.data?.similarCases) ? response.data.similarCases : [];
 
-    console.log("Similar cases returned by ML:", similarCases);
 
     let enrichedSimilarCases = [];
     if (similarCases.length) {
       const similarCaseIds = similarCases.map(c => c.caseId).filter(Boolean);
-      console.log("Looking up caseIds in Mongo:", similarCaseIds);
       const similarCaseDetails = await Case.find({ caseId: { $in: similarCaseIds } });
-      console.log("Mongo returned cases:", similarCaseDetails.length);
       enrichedSimilarCases = similarCases.map(sc => {
         const details = similarCaseDetails.find(cd => cd.caseId === sc.caseId);
         return details
