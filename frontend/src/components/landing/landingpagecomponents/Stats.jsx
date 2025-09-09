@@ -5,7 +5,9 @@ const Stats = ({ darkMode }) => {
   return (
     <section
       id="stats"
-      className={`py-20 px-8 ${darkMode ? "bg-slate-800" : "bg-slate-50"}`}
+      className={`py-12 md:py-20 px-4 md:px-8 ${
+        darkMode ? "bg-slate-800" : "bg-slate-50"
+      }`}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -14,24 +16,30 @@ const Stats = ({ darkMode }) => {
         viewport={{ once: true }}
         className="max-w-7xl mx-auto"
       >
-        <h2 className="text-4xl font-bold text-center mb-12">Proven Results</h2>
-        <div className="grid grid-cols-4 gap-8">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">
+          Proven Results
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {[
             {
               value: "95%",
               label: "Model Accuracy",
-              color: "text-emerald-500",
+              color: "text-[#CFAE6D]",
             },
-            { value: "500K+", label: "Cases Analyzed", color: "text-blue-500" },
+            {
+              value: "500K+",
+              label: "Cases Analyzed",
+              color: "text-[#0A2342] dark:text-[#CFAE6D]",
+            },
             {
               value: "2.4M",
               label: "Legal Documents",
-              color: "text-purple-500",
+              color: "text-[#CFAE6D]",
             },
             {
               value: "98%",
               label: "User Satisfaction",
-              color: "text-pink-500",
+              color: "text-[#0A2342] dark:text-[#CFAE6D]",
             },
           ].map((stat, index) => (
             <motion.div
