@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "@mui/icons-material";
+import { axiosInstance } from "../../../lib/axios.js";
 import Case from "./Case";
 
 const DecidedCases = () => {
@@ -7,11 +8,50 @@ const DecidedCases = () => {
   const [expandedCaseId, setExpandedCaseId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [allCases, setAllCases] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  const grantedCases = allCases.filter((c) => c.bailStatus === "Accepted");
-  const declinedCases = allCases.filter((c) => c.bailStatus === "Declined");
+  useEffect(() => {
+    const fetchCases = async () => {
+      if (!user?.username) {
+        setError("User not found.");
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axiosInstance.get(
+          `/detainee/${user.username}/ongoing-cases`
+        );
+        if (response.data && response.data.success) {
+          setAllCases(response.data.data || []);
+        } else {
+          setError(response.data.message || "Failed to fetch cases.");
+        }
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            "An error occurred while fetching cases."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, [user?.username]);
+
+  const grantedCases = allCases.filter(
+    (c) =>
+      c.bailStatus === "Accepted" &&
+      c.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const declinedCases = allCases.filter(
+    (c) =>
+      c.bailStatus === "Declined" &&
+      c.caseTitle.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const toggleExpand = (caseId) => {
     setExpandedCaseId((prev) => (prev === caseId ? null : caseId));

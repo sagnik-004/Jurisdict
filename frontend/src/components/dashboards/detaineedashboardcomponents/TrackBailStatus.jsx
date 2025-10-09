@@ -1,11 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { axiosInstance } from "../../../lib/axios.js";
 import Case from "./Case";
 
 const TrackBailStatus = () => {
   const [pendingBailCases, setPendingBailCases] = useState([]);
   const [expandedCase, setExpandedCase] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      if (!user?.username) {
+        setError("User not found.");
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axiosInstance.get(
+          `/detainee/${user.username}/ongoing-cases`
+        );
+        if (response.data && response.data.success) {
+          const allCases = response.data.data;
+          setPendingBailCases(
+            allCases.filter((c) => c.bailStatus === "Pending to judge")
+          );
+        } else {
+          setError(response.data.message || "Failed to fetch cases.");
+        }
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            "An error occurred while fetching cases."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, [user?.username]);
 
   const handleToggle = (caseId) => {
     setExpandedCase((prevExpandedCase) =>
