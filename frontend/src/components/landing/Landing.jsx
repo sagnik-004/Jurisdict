@@ -25,6 +25,7 @@ const Landing = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -36,41 +37,67 @@ const Landing = () => {
   }, [darkMode]);
 
   useEffect(() => {
+    let scrollTimeout;
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-      const sections = document.querySelectorAll("section[id]");
-      let currentSection = "";
-      sections.forEach((section) => {
-        const sectionTop = section.offsetTop;
-        if (window.scrollY >= sectionTop - 100) {
-          currentSection = section.getAttribute("id");
-        }
-      });
-      setActiveSection(currentSection);
+
+      if (!isUserScrolling) {
+        const sections = document.querySelectorAll("section[id]");
+        const scrollPosition = window.scrollY + 200;
+
+        sections.forEach((section) => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.offsetHeight;
+          const sectionBottom = sectionTop + sectionHeight;
+
+          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            const sectionId = section.getAttribute("id");
+            if (sectionId !== activeSection) {
+              setActiveSection(sectionId);
+            }
+          }
+        });
+      }
+
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        setIsUserScrolling(false);
+      }, 1000);
     };
 
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowRegisterMenu(false);
       }
-      // Close mobile menu when clicking outside
-      if (
-        !event.target.closest("nav") &&
-        !event.target.closest("[data-mobile-menu]")
-      ) {
+
+      const mobileMenuButton = event.target.closest(
+        "[data-mobile-menu-button]"
+      );
+      const mobileMenu = event.target.closest("[data-mobile-menu]");
+
+      if (!mobileMenuButton && !mobileMenu && showMobileMenu) {
         setShowMobileMenu(false);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mousedown", handleClickOutside);
+      clearTimeout(scrollTimeout);
     };
-  }, []);
+  }, [activeSection, isUserScrolling, showMobileMenu]);
 
   const scrollToSection = (id) => {
+    setShowRegisterMenu(false);
+    setShowMobileMenu(false);
+
+    setIsUserScrolling(true);
+    setActiveSection(id);
+
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -109,8 +136,8 @@ const Landing = () => {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="flex items-center gap-3"
             >
-              <Scale size={28} className="text-[#CFAE6D]" />
-              <h1 className="text-xl md:text-2xl font-bold text-[#0A2342] dark:text-white">
+              <Scale size={28} className="text-teal-500" />
+              <h1 className="text-xl md:text-2xl font-heading font-bold text-transparent bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text">
                 JurisDict
               </h1>
             </motion.div>
@@ -125,10 +152,10 @@ const Landing = () => {
               <button
                 key={link}
                 onClick={() => scrollToSection(link)}
-                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+                className={`text-sm font-body font-medium px-4 py-2 rounded-lg transition-all duration-200 ${
                   activeSection === link
-                    ? "text-[#CFAE6D] bg-[#CFAE6D]/20"
-                    : "hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
+                    ? "bg-teal-600/20 dark:bg-teal-400/20 text-teal-700 dark:text-teal-300 font-semibold border border-teal-600/20 dark:border-teal-400/20"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 {link.charAt(0).toUpperCase() + link.slice(1)}
@@ -137,9 +164,9 @@ const Landing = () => {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Mobile menu button */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
+              data-mobile-menu-button
               className="md:hidden p-2 rounded-full border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-colors"
             >
               {showMobileMenu ? <X size={18} /> : <Menu size={18} />}
@@ -155,7 +182,7 @@ const Landing = () => {
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setShowRegisterMenu(!showRegisterMenu)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-md bg-[#CFAE6D] hover:bg-[#B8954D] text-white transition-all duration-300 text-sm md:text-base"
+                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-md bg-gradient-to-r from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-white transition-all duration-150 text-sm md:text-base font-body font-medium"
               >
                 <UserPlus size={16} />
                 <span className="hidden sm:inline">Sign Up</span>
@@ -177,7 +204,9 @@ const Landing = () => {
                         onClick={() => handleRoleNavigation(role.name)}
                         className="w-full px-4 py-3 rounded-md text-left flex items-center gap-3 transition-colors hover:bg-slate-100/70 dark:hover:bg-slate-700/70"
                       >
-                        {role.icon}
+                        {React.cloneElement(role.icon, {
+                          className: "text-teal-500",
+                        })}
                         <span>{role.name}</span>
                       </button>
                     ))}
@@ -189,7 +218,6 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Mobile Navigation Menu */}
       <AnimatePresence>
         {showMobileMenu && (
           <motion.div
@@ -208,10 +236,10 @@ const Landing = () => {
                     scrollToSection(link);
                     setShowMobileMenu(false);
                   }}
-                  className={`w-full text-left px-4 py-3 rounded-md transition-colors ${
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
                     activeSection === link
-                      ? "text-[#CFAE6D] bg-[#CFAE6D]/20"
-                      : "hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
+                      ? "bg-teal-500/90 text-white font-semibold shadow-lg backdrop-blur-sm"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-slate-100"
                   }`}
                 >
                   {link.charAt(0).toUpperCase() + link.slice(1)}
@@ -244,8 +272,8 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Scale size={24} className="text-[#CFAE6D]" />
-              <h3 className="text-lg font-semibold text-[#0A2342] dark:text-white">
+              <Scale size={24} className="text-teal-500" />
+              <h3 className="text-lg font-semibold text-transparent bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text">
                 JurisDict
               </h3>
             </div>
@@ -262,7 +290,7 @@ const Landing = () => {
                 <a
                   key={item}
                   href="#"
-                  className="text-slate-600 dark:text-slate-400 hover:text-[#CFAE6D] dark:hover:text-[#CFAE6D] transition-colors"
+                  className="text-slate-600 dark:text-slate-400 hover:text-transparent hover:bg-gradient-to-r hover:from-teal-400 hover:to-cyan-500 hover:bg-clip-text transition-colors"
                 >
                   {item}
                 </a>
@@ -278,7 +306,7 @@ const Landing = () => {
                 <a
                   key={item}
                   href="#"
-                  className="text-slate-600 dark:text-slate-400 hover:text-[#CFAE6D] dark:hover:text-[#CFAE6D] transition-colors"
+                  className="text-slate-600 dark:text-slate-400 hover:text-transparent hover:bg-gradient-to-r hover:from-teal-400 hover:to-cyan-500 hover:bg-clip-text transition-colors"
                 >
                   {item}
                 </a>
@@ -294,7 +322,7 @@ const Landing = () => {
                 <a
                   key={item}
                   href="#"
-                  className="text-slate-600 dark:text-slate-400 hover:text-[#CFAE6D] dark:hover:text-[#CFAE6D] transition-colors"
+                  className="text-slate-600 dark:text-slate-400 hover:text-transparent hover:bg-gradient-to-r hover:from-teal-400 hover:to-cyan-500 hover:bg-clip-text transition-colors"
                 >
                   {item}
                 </a>

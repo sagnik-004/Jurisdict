@@ -69,7 +69,7 @@ class TypeWriter extends React.Component {
   render() {
     const { text, isWaiting, showCursor } = this.state;
     return (
-      <span className="inline-block">
+      <span className="inline-block font-accent tracking-tight">
         {text}
         <span
           className={`transition-opacity duration-200 ${
