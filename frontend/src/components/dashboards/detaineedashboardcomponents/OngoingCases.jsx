@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "@mui/icons-material";
+import { axiosInstance } from "../../../lib/axios.js";
 import Case from "./Case";
 
 const OngoingCases = () => {
@@ -8,8 +9,43 @@ const OngoingCases = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [registeredCases, setRegisteredCases] = useState([]);
   const [appeals, setAppeals] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      if (!user?.username) {
+        setError("User not found.");
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axiosInstance.get(
+          `/detainee/${user.username}/ongoing-cases`
+        );
+        if (response.data && response.data.success) {
+          const allCases = response.data.data;
+          setRegisteredCases(allCases.filter((c) => c.bailStatus === ""));
+          setAppeals(
+            allCases.filter((c) => c.bailStatus === "Pending to lawyer")
+          );
+        } else {
+          setError(response.data.message || "Failed to fetch cases.");
+        }
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            "An error occurred while fetching cases."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, [user?.username]);
 
   const toggleCaseDescription = (caseId) => {
     setExpandedCase((prev) => (prev === caseId ? null : caseId));
@@ -104,7 +140,7 @@ const OngoingCases = () => {
                 : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500"
             }`}
           >
-            Appeals from Detainee
+            Appeals to Lawyer
           </button>
         </nav>
       </div>
@@ -112,7 +148,7 @@ const OngoingCases = () => {
       <div className="mt-6">
         {activeTab === "registered" &&
           renderCaseList(registeredCases, "registered")}
-        {activeTab === "appeals" && renderCaseList(appeals, "appeals")}
+        {activeTab === "appeals" && renderCaseList(appeals, "appealed")}
       </div>
     </div>
   );

@@ -1,18 +1,16 @@
 import os
-import requests
-import json
+import google.generativeai as genai
 
 def generate_ai_assistance(bail_decision_data, entity):
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return "Error: GEMINI_API_KEY not found in environment variables."
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-    
-    headers = {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': api_key
-    }
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+    except Exception as e:
+        return f"Error configuring AI model: {str(e)}"
 
     decision = bail_decision_data.get('decision', 'N/A')
     reasoning = bail_decision_data.get('reasoning', {})
@@ -38,6 +36,7 @@ def generate_ai_assistance(bail_decision_data, entity):
             vague_summary = "leaning favorably, though subject to judicial review."
         elif decision == "Deny Bail":
             vague_summary = "presenting significant challenges."
+        
         if entity == 'lawyer':
             prompt = (
                 "Generate a brief, high-level professional summary for a lawyer. "
@@ -51,28 +50,8 @@ def generate_ai_assistance(bail_decision_data, entity):
                 "Please understand this is not a final judicial decision."
             )
 
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": prompt
-                    }
-                ]
-            }
-        ]
-    }
-
     try:
-        response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
-        response.raise_for_status()
-        result = response.json()
-        
-        return result['candidates'][0]['content']['parts'][0]['text']
-    
-    except requests.exceptions.RequestException as e:
-        return f"Error communicating with AI service: {str(e)}"
-    except (KeyError, IndexError) as e:
-        return f"Error parsing AI service response: {str(e)}"
+        response = model.generate_content(prompt)
+        return response.text
     except Exception as e:
-        return f"An unexpected error occurred: {str(e)}"
+        return f"An unexpected error occurred while communicating with the AI service: {str(e)}"

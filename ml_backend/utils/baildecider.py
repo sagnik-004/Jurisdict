@@ -13,11 +13,9 @@ def decide_bail(case_points):
             }
         }
 
-    # Helper function to check boolean strings
     def is_true(key):
         return str(case_points.get(key, 'false')).lower() == 'true'
 
-    # Red Flags (Arguments AGAINST Bail)
     bns_sections = case_points.get("bnsSections", "").split(', ')
     crime_type = case_points.get("crimeType", "")
     heinous_crimes = ["302", "307", "376", "395", "397"]
@@ -77,7 +75,6 @@ def decide_bail(case_points):
         risk_score += 15
         red_flags.append("The accused has a documented history of violent behavior.")
 
-    # Green Flags (Arguments FOR Bail)
     if is_true("ownsProperty") and is_true("isEmployed") and is_true("hasLocalFamily"):
         risk_score -= 15
         green_flags.append("The accused has deep roots in the community (property, job, family).")
